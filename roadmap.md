@@ -1,0 +1,2 @@
+- [ ] Showcase feature (Show some of your collected web pages)
+- [ ] Tag feature (Tag your web pages, and use tag as a filter condition)
