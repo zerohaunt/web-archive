@@ -10,8 +10,8 @@ async function verifyAdminToken(DB: D1Database, token: string): Promise<'new' | 
   }
   const exist = await checkAdminExist(DB)
   if (!exist) {
-    setAdminToken(DB, token)
-    return 'new'
+    const success = await setAdminToken(DB, token)
+    return success ? 'new' : 'reject'
   }
   return 'reject'
 }
@@ -22,6 +22,7 @@ async function setAdminToken(DB: D1Database, token: string): Promise<boolean> {
     throw new Error('Admin token already exists')
   }
   const result = await DB.prepare(`INSERT INTO stores (key, value) VALUES ('ADMIN_TOKEN', ?)`).bind(token).run()
+  console.log(result)
   return result.success
 }
 
