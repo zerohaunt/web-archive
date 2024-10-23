@@ -8,7 +8,7 @@ import { useNavigate, useParams } from '~/router'
 async function getPageContent(pageId: string | undefined) {
   if (!pageId)
     return ''
-  const url = `/api/shelf?pageId=${pageId}`
+  const url = `/api/pages/content?pageId=${pageId}`
   const res = await fetch(url, {
     method: 'GET',
     headers: {

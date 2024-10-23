@@ -28,7 +28,8 @@ async function queryPage(DB: D1Database, options: { folderId: number, pageNumber
       pageDesc,
       screenshotId,
       createdAt,
-      updatedAt
+      updatedAt,
+      isShowcased
     FROM pages
     WHERE folderId = ? AND isDeleted = 0
   `

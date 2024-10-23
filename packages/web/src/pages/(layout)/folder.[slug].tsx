@@ -1,7 +1,7 @@
 import { isNil } from '@web-archive/shared/utils'
 import { useOutletContext } from 'react-router-dom'
 import { useInfiniteScroll, useRequest } from 'ahooks'
-import { memo, useContext, useEffect, useRef } from 'react'
+import { useContext, useEffect, useRef } from 'react'
 import type { Ref } from '@web-archive/shared/components/scroll-area'
 import { ScrollArea } from '@web-archive/shared/components/scroll-area'
 import { Button } from '@web-archive/shared/components/button'
@@ -16,15 +16,7 @@ import CardView from '~/components/card-view'
 import EmptyWrapper from '~/components/empty-wrapper'
 import ListView from '~/components/list-view'
 import AppContext from '~/store/app'
-
-const LoadingMore = memo(() => {
-  return (
-    <div className="w-full h-16 flex flex-col items-center justify-center mt-2">
-      <div className="m-b-xl h-8 w-8 animate-spin border-4 border-t-transparent rounded-full border-primary"></div>
-      <div>Loading more...</div>
-    </div>
-  )
-})
+import LoadingMore from '~/components/loading-more'
 
 function FolderPage() {
   const { slug } = useParams('/folder/:slug')
