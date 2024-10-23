@@ -4,18 +4,20 @@ import { Button } from '@web-archive/shared/components/button'
 import { Input } from '@web-archive/shared/components/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@web-archive/shared/components/card'
 import toast, { Toaster } from 'react-hot-toast'
+import { Eye, EyeOff } from 'lucide-react'
 import router from '~/utils/router'
 
 export default function LoginPage() {
   const [key, setKey] = useState('')
   const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
   const handleLogin = (e: FormEvent<HTMLFormElement>) => {
-    setLoading(true)
     e.preventDefault()
-    if (key.length === 0) {
-      toast.error('Key is required')
+    if (key.length < 8) {
+      toast.error('Password must be at least 8 characters')
       return
     }
+    setLoading(true)
     fetch('api/auth', {
       method: 'POST',
       headers: {
@@ -29,7 +31,7 @@ export default function LoginPage() {
           return
         }
         if (res.status === 201) {
-          toast.success('Admin token set, please use it login again')
+          toast.success('Admin password set, please use it login again')
           return
         }
         const json = await res.json()
@@ -57,12 +59,23 @@ export default function LoginPage() {
         <CardContent>
           <form onSubmit={handleLogin}>
             <div className="space-y-4">
-              <Input
-                type="password"
-                placeholder="Enter your key"
-                value={key}
-                onChange={e => setKey(e.target.value)}
-              />
+              <div className="relative">
+                <Input
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="Enter your password, at least 8 characters"
+                  value={key}
+                  onChange={e => setKey(e.target.value)}
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <Eye /> : <EyeOff />}
+                </Button>
+              </div>
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? 'Logging in...' : 'Login'}
               </Button>
