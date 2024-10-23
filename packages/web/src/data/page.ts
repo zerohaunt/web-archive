@@ -2,7 +2,7 @@ import type { Page } from '@web-archive/shared/types'
 import fetcher from '~/utils/fetcher'
 
 function getPageDetail(id: string): Promise<Page> {
-  return fetcher<Page>('/pages/get_page', {
+  return fetcher<Page>('/pages/detail', {
     method: 'GET',
     query: {
       id,
@@ -62,6 +62,16 @@ function updatePage(body: {
   })
 }
 
+function updatePageShowcase(body: {
+  id: number
+  isShowcased: number
+}): Promise<Page> {
+  return fetcher<Page>('/pages/update_showcase', {
+    method: 'PUT',
+    body,
+  })
+}
+
 function clearDeletedPage(): Promise<boolean> {
   return fetcher<boolean>('/pages/clear_deleted', {
     method: 'DELETE',
@@ -76,4 +86,5 @@ export {
   queryDeletedPage,
   restorePage,
   clearDeletedPage,
+  updatePageShowcase,
 }

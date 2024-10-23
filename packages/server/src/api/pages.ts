@@ -6,6 +6,8 @@ import result from '~/utils/result'
 import { clearDeletedPage, deletePageById, getPageById, insertPage, queryDeletedPage, queryPage, restorePage, selectPageTotalCount } from '~/model/page'
 import { getFolderById, restoreFolder } from '~/model/folder'
 import { getBase64FileFromBucket, saveFileToBucket } from '~/utils/file'
+import type { Page } from '~/sql/types'
+import { updateShowcase } from '~/model/showcase'
 
 const app = new Hono<HonoTypeUserInformation>()
 
@@ -105,7 +107,7 @@ app.post(
 )
 
 app.get(
-  '/get_page',
+  '/detail',
   validator('query', (value, c) => {
     if (!value.id || Number.isNaN(Number(value.id))) {
       return c.json(result.error(400, 'ID is required'))
@@ -243,6 +245,61 @@ app.delete(
     if (await clearDeletedPage(c.env.DB)) {
       return c.json(result.success(null))
     }
+  },
+)
+
+app.get('/content', async (c) => {
+  const pageId = c.req.query('pageId')
+  console.log(pageId)
+  // redirect to 404
+  if (!pageId) {
+    return c.redirect('/error')
+  }
+
+  // todo refactor
+  const pageListResult = await c.env.DB.prepare('SELECT * FROM pages WHERE isDeleted = 0 AND id = ?')
+    .bind(pageId)
+    .all()
+  if (!pageListResult.success) {
+    return c.redirect('/error')
+  }
+
+  const page = pageListResult.results?.[0] as Page
+  if (!page) {
+    return c.redirect('/error')
+  }
+
+  const content = await c.env.BUCKET.get(page.contentUrl)
+  if (!content) {
+    return c.redirect('/error')
+  }
+
+  return c.html(
+    await content?.text(),
+  )
+})
+
+app.put(
+  '/update_showcase',
+  validator('json', (value, c) => {
+    if (!value.id || typeof value.id !== 'number') {
+      return c.json(result.error(400, 'Page ID is required and should be a number'))
+    }
+
+    if (typeof value.isShowcased !== 'number') {
+      return c.json(result.error(400, 'isShowcased is required and should be a number'))
+    }
+
+    return {
+      id: value.id,
+      isShowcased: value.isShowcased,
+    }
+  }),
+  async (c) => {
+    const { id, isShowcased } = c.req.valid('json')
+    const updateResult = await updateShowcase(c.env.DB, { id, isShowcased })
+
+    return c.json(result.success(updateResult))
   },
 )
 

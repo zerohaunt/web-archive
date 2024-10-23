@@ -57,6 +57,7 @@ async function processResponse<T>(res: Response) {
       default:
         break
     }
+    throw new Error(content.message)
   }
 
   return content.data

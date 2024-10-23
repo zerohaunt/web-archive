@@ -11,6 +11,7 @@ type Page = {
   deletedAt: Date | null
   createdAt: Date
   updatedAt: Date
+  isShowcased: number
 }
 
 type Folder = {

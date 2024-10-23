@@ -3,7 +3,6 @@ export type Bindings = {
   DB: D1Database
   KV: KVNamespace
   BUCKET: R2Bucket
-  BEARER_TOKEN: string
 }
 
 export type HonoTypeUserInformation = {
