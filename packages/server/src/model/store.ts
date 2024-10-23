@@ -3,7 +3,7 @@ async function checkAdminExist(DB: D1Database): Promise<boolean> {
   return result.count > 0
 }
 
-async function verifyAdminToken(DB: D1Database, token: string): Promise<'new' | 'reject' | 'accept'> {
+async function verifyAdminToken(DB: D1Database, token: string): Promise<'new' | 'fail' | 'reject' | 'accept'> {
   const result: { count: number } = await DB.prepare(`SELECT COUNT(*) as count FROM stores WHERE key = 'ADMIN_TOKEN' AND value = ?`).bind(token).first()
   if (result.count > 0) {
     return 'accept'
@@ -11,7 +11,7 @@ async function verifyAdminToken(DB: D1Database, token: string): Promise<'new' | 
   const exist = await checkAdminExist(DB)
   if (!exist) {
     const success = await setAdminToken(DB, token)
-    return success ? 'new' : 'reject'
+    return success ? 'new' : 'fail'
   }
   return 'reject'
 }
@@ -22,7 +22,6 @@ async function setAdminToken(DB: D1Database, token: string): Promise<boolean> {
     throw new Error('Admin token already exists')
   }
   const result = await DB.prepare(`INSERT INTO stores (key, value) VALUES ('ADMIN_TOKEN', ?)`).bind(token).run()
-  console.log(result)
   return result.success
 }
 

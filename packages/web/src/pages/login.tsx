@@ -8,7 +8,9 @@ import router from '~/utils/router'
 
 export default function LoginPage() {
   const [key, setKey] = useState('')
+  const [loading, setLoading] = useState(false)
   const handleLogin = (e: FormEvent<HTMLFormElement>) => {
+    setLoading(true)
     e.preventDefault()
     if (key.length === 0) {
       toast.error('Key is required')
@@ -21,17 +23,23 @@ export default function LoginPage() {
       },
     })
       .then(async (res) => {
-        if (res.ok) {
+        if (res.status === 200) {
           localStorage.setItem('token', key)
           router.navigate('/')
+          return
         }
-        else {
-          const json = await res.json()
-          toast.error(json.error)
+        if (res.status === 201) {
+          toast.success('Admin token set, please use it login again')
+          return
         }
+        const json = await res.json()
+        toast.error(json.error)
       })
       .catch(() => {
-        toast.error('Invalid key')
+        toast.error('Something went wrong')
+      })
+      .finally(() => {
+        setLoading(false)
       })
   }
 
@@ -55,8 +63,8 @@ export default function LoginPage() {
                 value={key}
                 onChange={e => setKey(e.target.value)}
               />
-              <Button type="submit" className="w-full">
-                Login
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? 'Logging in...' : 'Login'}
               </Button>
             </div>
           </form>

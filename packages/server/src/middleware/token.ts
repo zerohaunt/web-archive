@@ -16,8 +16,12 @@ async function tokenMiddleware(c: Context, next: Next) {
     return c.json({ error: 'Invalid token' }, 401)
   }
 
+  if (result === 'fail') {
+    return c.json({ error: 'Admin token set failed' }, 401)
+  }
+
   if (result === 'new') {
-    return c.json({ error: 'Admin token set, please use it login again' }, 401)
+    return c.json({ error: 'Admin token set, please use it login again' }, 201)
   }
 
   await next()
