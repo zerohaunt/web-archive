@@ -9,3 +9,13 @@ onMessage('scrape-page-data', async ({ data: singleFileSetting }) => {
     },
   })
 })
+
+onMessage('get-basic-page-data', async () => {
+  const descriptionList = document.getElementsByName('description')
+  const description = descriptionList?.[0]?.getAttribute('content') ?? ''
+  return {
+    title: document.title,
+    href: window.location.href,
+    pageDesc: description,
+  }
+})
