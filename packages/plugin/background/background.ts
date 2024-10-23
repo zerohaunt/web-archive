@@ -51,31 +51,6 @@ onMessage('get-server-url', async () => {
   return { serverUrl }
 })
 
-onMessage('save-page', async ({ data }) => {
-  const { href, title, pageDesc, folderId, content } = data
-
-  const form = new FormData()
-  form.append('title', title)
-  form.append('pageDesc', pageDesc)
-  form.append('pageUrl', href)
-  form.append('folderId', folderId)
-  form.append('pageFile', new Blob([content], { type: 'text/html' }))
-  if (isNotNil(data.screenshot)) {
-    form.append('screenshot', base64ToBlob(data.screenshot, 'image/webp'))
-  }
-
-  try {
-    await request('/pages/upload_new_page', {
-      method: 'POST',
-      body: form,
-    })
-    return { success: true }
-  }
-  catch {
-    return { success: false }
-  }
-})
-
 onMessage('check-auth', async () => {
   try {
     await request('/auth', {
@@ -111,11 +86,33 @@ onMessage('get-all-folders', async () => {
   }
 })
 
-onMessage('get-current-page-data', async ({ data: { tabId, ...singleFileSetting } }) => {
+onMessage('add-save-page-task', async ({ data: { tabId, singleFileSetting, pageForm } }) => {
   await Browser.scripting.executeScript({
     target: { tabId },
     files: ['/lib/single-file.js', '/lib/single-file-extension-core.js'],
   })
-  const pageData = await sendMessage('scrape-page-data', singleFileSetting, `content-script@${tabId}`)
-  return pageData
+  const { content } = await sendMessage('scrape-page-data', singleFileSetting, `content-script@${tabId}`)
+
+  const { href, title, pageDesc, folderId, screenshot } = pageForm
+
+  const form = new FormData()
+  form.append('title', title)
+  form.append('pageDesc', pageDesc)
+  form.append('pageUrl', href)
+  form.append('folderId', folderId)
+  form.append('pageFile', new Blob([content], { type: 'text/html' }))
+  if (isNotNil(screenshot)) {
+    form.append('screenshot', base64ToBlob(screenshot, 'image/webp'))
+  }
+
+  try {
+    await request('/pages/upload_new_page', {
+      method: 'POST',
+      body: form,
+    })
+    return { success: true }
+  }
+  catch {
+    return { success: false }
+  }
 })

@@ -3,20 +3,22 @@ import type { LoadStage, SingleFileSetting } from '~/utils/singleFile'
 
 declare module 'webext-bridge' {
   export interface ProtocolMap {
-    'save-page': ProtocolWithReturn<{
-      content: string
-      title: string
-      href: string
-      folderId: string
-      pageDesc: string
-      screenshot?: string
-    }, { success: boolean }>
-    'get-current-page-data': ProtocolWithReturn<{ tabId: number } & SingleFileSetting, {
-      content: string
+    'get-basic-page-data': ProtocolWithReturn<{}, {
       title: string
       href: string
       pageDesc: string
     }>
+    'add-save-page-task': ProtocolWithReturn<{
+      tabId: number
+      singleFileSetting: SingleFileSetting
+      pageForm: {
+        title: string
+        pageDesc: string
+        href: string
+        folderId: string
+        screenshot?: string
+      }
+    }, {}>
     'get-server-url': ProtocolWithReturn<{}, { serverUrl: string }>
     'set-server-url': ProtocolWithReturn<{ url: string }, { success: boolean }>
     'check-auth': ProtocolWithReturn<{}, { success: boolean }>

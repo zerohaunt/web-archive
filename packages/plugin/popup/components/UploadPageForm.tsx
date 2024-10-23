@@ -63,26 +63,31 @@ async function takeScreenshot(windowId: number | undefined): Promise<string | un
   return await compressImage(screenshot)
 }
 
-async function scrapePageData() {
+async function getCurrentTab() {
   const tabs = await Browser.tabs.query({ active: true, currentWindow: true })
-  const tab = tabs[0]
+  return tabs[0]
+}
+
+async function scrapePageData() {
+  const tab = await getCurrentTab()
 
   if (!tab?.id) {
     return {
       title: '',
       pageDesc: '',
-      content: '',
       href: '',
       screenshot: undefined,
     }
   }
 
-  const pageData = await sendMessage('get-current-page-data', { tabId: tab.id, ...getSingleFileSetting() }, 'background')
-  const screenshot = await takeScreenshot(tab.windowId)
+  const [pageData, screenshot] = await Promise.all([
+    sendMessage('get-basic-page-data', {}, `content-script@${tab.id}`),
+    takeScreenshot(tab.windowId),
+  ])
+
   return {
     title: pageData.title,
     pageDesc: pageData.pageDesc,
-    content: pageData.content,
     href: pageData.href,
     screenshot,
   }
@@ -109,17 +114,10 @@ function UploadPageForm({ setActivePage }: UploadPageFormProps) {
   const [uploadPageData, setUploadPageData] = useState({
     title: '',
     pageDesc: '',
-    content: '',
     href: '',
     folderId: undefined as undefined | string,
     screenshot: undefined as undefined | string,
   })
-  const [loadingText, setLoadingText] = useState<string | ReactNode>('Scraping Page Data...')
-  useEffect(() => {
-    onMessage('scrape-page-progress', async ({ data }) => {
-      setLoadingText(<ScrapingPageProgress stage={`${data.stage}`} />)
-    })
-  }, [])
 
   function handleChange(e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLTextAreaElement> | ChangeEvent<HTMLSelectElement>) {
     const { name, value } = e.target
@@ -153,29 +151,28 @@ function UploadPageForm({ setActivePage }: UploadPageFormProps) {
     setActivePage('home')
   }
 
-  const [isSavingPage, setIsSavingPage] = useState(false)
   async function handleSavePage() {
     console.log('save page', uploadPageData)
     if (isNil(uploadPageData.folderId)) {
       // todo show error
       return
     }
-    setLoadingText('Saving Page...')
-    setIsSavingPage(true)
-    const { success } = await sendMessage('save-page', {
-      title: uploadPageData.title,
-      pageDesc: uploadPageData.pageDesc,
-      content: uploadPageData.content,
-      href: uploadPageData.href,
-      folderId: uploadPageData.folderId,
-      screenshot: uploadPageData.screenshot,
+    const tab = await getCurrentTab()
+    if (isNil(tab.id)) {
+      // todo show error
+      return
+    }
+    await sendMessage('add-save-page-task', {
+      tabId: tab.id,
+      singleFileSetting: getSingleFileSetting(),
+      pageForm: {
+        title: uploadPageData.title,
+        pageDesc: uploadPageData.pageDesc,
+        href: uploadPageData.href,
+        folderId: uploadPageData.folderId,
+        screenshot: uploadPageData.screenshot,
+      },
     })
-    if (success) {
-      console.log('save success')
-    }
-    else {
-      console.log('save failed')
-    }
     setActivePage('home')
   }
 
@@ -190,10 +187,10 @@ function UploadPageForm({ setActivePage }: UploadPageFormProps) {
     },
   })
 
-  if (isScrapingPage || isSavingPage) {
+  if (isScrapingPage) {
     return (
       <LoadingPage
-        loadingText={loadingText}
+        loadingText="Scraping Page Data..."
       />
     )
   }
