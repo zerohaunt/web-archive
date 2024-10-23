@@ -23,12 +23,14 @@ function createModal() {
     alignItems: 'center',
     zIndex: 99999999,
   })
+  // add this class to make singlefile ignore this element when save page
+  modal.classList.add('single-file-ui-element')
   return modal
 }
 
 onMessage('scrape-page-data', async ({ data: singleFileSetting }) => {
   const modal = createModal()
-  document.body.appendChild(modal)
+  document.documentElement.appendChild(modal)
 
   const pageData = await getCurrentPageData({
     ...singleFileSetting,
