@@ -5,7 +5,7 @@
 
 ## Web Archive
 
-Web Archive is a web archive tool, including the following parts:  
+Web Archive is a free web archiving and sharing service based on Cloudflare, including the following parts:  
 
 - Browser plugin: Save the webpage as a single html file and upload it to the server.
 - Server: Receive the html file uploaded by the browser plugin and store it in the database and storage bucket.
@@ -26,9 +26,7 @@ In the stage of creating the token, the token needs at least the following permi
 
 > This is not the minimum permission set, if someone knows what the minimum permission set is, please help me update this document.
 
-Once deployed, you need to set the `BEARER_TOKEN` value in the Cloudflare project panel.   
-Before setting it, the service will return the `Token not set` error.  
-The value is used for authentication, please keep it safe.  
+Once deployed, please login as soon as possible, the first user to login will be set as the administrator.
 
 ---
 
