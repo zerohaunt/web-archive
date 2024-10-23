@@ -28,10 +28,13 @@ app.get('/', async (c) => {
 })
 
 const api = new Hono<HonoTypeUserInformation>()
-api.route('/pages', pages.use(tokenMiddleware))
-api.route('/auth', auth.use(tokenMiddleware))
-api.route('/folders', folders.use(tokenMiddleware))
 api.route('/showcase', showcase)
+
+api.use(tokenMiddleware)
+
+api.route('/pages', pages)
+api.route('/auth', auth)
+api.route('/folders', folders)
 app.route('/api', api)
 
 export default app
