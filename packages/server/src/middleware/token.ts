@@ -1,4 +1,5 @@
 import type { Context, Next } from 'hono'
+import { verifyAdminToken } from '~/model/store'
 
 async function tokenMiddleware(c: Context, next: Next) {
   const authHeader = c.req.header('Authorization')
@@ -9,12 +10,18 @@ async function tokenMiddleware(c: Context, next: Next) {
 
   const token = authHeader.split(' ')[1]
 
-  if (!c.env.BEARER_TOKEN) {
-    return c.json({ error: 'Token not set' }, 401)
+  const result = await verifyAdminToken(c.env.DB, token)
+
+  if (result === 'reject') {
+    return c.json({ error: 'Invalid token' }, 401)
   }
 
-  if (token !== c.env.BEARER_TOKEN) {
-    return c.json({ error: 'Invalid token' }, 401)
+  if (result === 'fail') {
+    return c.json({ error: 'Admin token set failed' }, 401)
+  }
+
+  if (result === 'new') {
+    return c.json({ error: 'Admin token set, please use it login again' }, 201)
   }
 
   await next()
