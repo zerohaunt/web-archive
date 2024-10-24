@@ -88,7 +88,7 @@ onMessage('get-all-folders', async () => {
 })
 
 onMessage('add-save-page-task', async ({ data: { tabId, singleFileSetting, pageForm } }) => {
-  await createAndRunTask({
+  createAndRunTask({
     tabId,
     singleFileSetting,
     pageForm,
