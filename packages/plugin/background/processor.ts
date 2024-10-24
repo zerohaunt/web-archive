@@ -2,6 +2,7 @@ import { sendMessage } from 'webext-bridge/background'
 import Browser from 'webextension-polyfill'
 import { request } from './background'
 import type { SingleFileSetting } from '~/utils/singleFile'
+import { base64ToBlob } from '~/utils/file'
 
 export interface SeriableSingleFileTask {
   uuid: string
@@ -76,7 +77,7 @@ async function uploadPageData(pageForm: CreateTaskOptions['pageForm'] & { conten
   form.append('folderId', folderId)
   form.append('pageFile', new Blob([content], { type: 'text/html' }))
   if (screenshot) {
-    form.append('screenshot', screenshot)
+    form.append('screenshot', base64ToBlob(screenshot, 'image/webp'))
   }
   await request('/pages/upload_new_page', {
     method: 'POST',
