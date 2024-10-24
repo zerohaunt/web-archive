@@ -3,6 +3,7 @@ import '~/lib/browser-polyfill.min.js'
 import '~/lib/single-file-background.js'
 import { onMessage, sendMessage } from 'webext-bridge/background'
 import { isNotNil } from '@web-archive/shared/utils'
+import { createAndRunTask, getTaskList } from './processor'
 import { base64ToBlob } from '~/utils/file.js'
 
 async function appendAuthHeader(options?: RequestInit) {
@@ -22,7 +23,7 @@ async function appendAuthHeader(options?: RequestInit) {
 }
 
 /* global RequestInit */
-async function request(url: string, options?: RequestInit | undefined) {
+export async function request(url: string, options?: RequestInit | undefined) {
   const { serverUrl } = await Browser.storage.local.get('serverUrl')
   const res = await fetch(`${serverUrl}/api${url}`, {
     credentials: 'same-origin',
@@ -87,32 +88,15 @@ onMessage('get-all-folders', async () => {
 })
 
 onMessage('add-save-page-task', async ({ data: { tabId, singleFileSetting, pageForm } }) => {
-  await Browser.scripting.executeScript({
-    target: { tabId },
-    files: ['/lib/single-file.js', '/lib/single-file-extension-core.js'],
+  await createAndRunTask({
+    tabId,
+    singleFileSetting,
+    pageForm,
   })
-  const { content } = await sendMessage('scrape-page-data', singleFileSetting, `content-script@${tabId}`)
+})
 
-  const { href, title, pageDesc, folderId, screenshot } = pageForm
-
-  const form = new FormData()
-  form.append('title', title)
-  form.append('pageDesc', pageDesc)
-  form.append('pageUrl', href)
-  form.append('folderId', folderId)
-  form.append('pageFile', new Blob([content], { type: 'text/html' }))
-  if (isNotNil(screenshot)) {
-    form.append('screenshot', base64ToBlob(screenshot, 'image/webp'))
-  }
-
-  try {
-    await request('/pages/upload_new_page', {
-      method: 'POST',
-      body: form,
-    })
-    return { success: true }
-  }
-  catch {
-    return { success: false }
+onMessage('get-page-task-list', async () => {
+  return {
+    taskList: await getTaskList(),
   }
 })

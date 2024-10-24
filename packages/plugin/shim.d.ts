@@ -1,4 +1,5 @@
 import type { ProtocolWithReturn } from 'webext-bridge'
+import type { SeriableSingleFileTask } from './background/processor'
 import type { LoadStage, SingleFileSetting } from '~/utils/singleFile'
 
 declare module 'webext-bridge' {
@@ -19,6 +20,7 @@ declare module 'webext-bridge' {
         screenshot?: string
       }
     }, {}>
+    'get-page-task-list': ProtocolWithReturn<{}, { taskList: Array<SeriableSingleFileTask> }>
     'get-server-url': ProtocolWithReturn<{}, { serverUrl: string }>
     'set-server-url': ProtocolWithReturn<{ url: string }, { success: boolean }>
     'check-auth': ProtocolWithReturn<{}, { success: boolean }>
