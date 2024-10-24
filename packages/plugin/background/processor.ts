@@ -36,6 +36,13 @@ async function getTaskList() {
 
 async function saveTaskList() {
   await Browser.storage.local.set({ tasks: taskList })
+  sendMessage('update-task-list', { taskList }, 'popup')
+}
+
+async function clearFinishedTaskList() {
+  const newTaskList = taskList.filter(task => task.status !== 'done')
+  taskList.splice(0, taskList.length, ...newTaskList)
+  await saveTaskList()
 }
 
 type CreateTaskOptions = {
@@ -115,4 +122,5 @@ async function createAndRunTask(options: CreateTaskOptions) {
 export {
   createAndRunTask,
   getTaskList,
+  clearFinishedTaskList,
 }

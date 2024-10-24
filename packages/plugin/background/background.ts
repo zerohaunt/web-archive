@@ -1,10 +1,8 @@
 import Browser from 'webextension-polyfill'
 import '~/lib/browser-polyfill.min.js'
 import '~/lib/single-file-background.js'
-import { onMessage, sendMessage } from 'webext-bridge/background'
-import { isNotNil } from '@web-archive/shared/utils'
-import { createAndRunTask, getTaskList } from './processor'
-import { base64ToBlob } from '~/utils/file.js'
+import { onMessage } from 'webext-bridge/background'
+import { clearFinishedTaskList, createAndRunTask, getTaskList } from './processor'
 
 async function appendAuthHeader(options?: RequestInit) {
   const { token } = await Browser.storage.local.get('token') ?? {}
@@ -99,4 +97,8 @@ onMessage('get-page-task-list', async () => {
   return {
     taskList: await getTaskList(),
   }
+})
+
+onMessage('clear-finished-task-list', async () => {
+  await clearFinishedTaskList()
 })

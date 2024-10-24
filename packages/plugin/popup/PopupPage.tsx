@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react'
 
 import { sendMessage } from 'webext-bridge/popup'
+import HistoryTaskList from './components/HistoryTaskList'
 import SettingPage from '~/popup/components/SettingPage'
 import LoginPage from '~/popup/components/LoginPage'
 import PluginHomePage from '~/popup/components/PluginHomePage'
 import UploadPageForm from '~/popup/components/UploadPageForm'
 import LoadingPage from '~/popup/components/LoadingPage'
 
-export type PageType = 'home' | 'login' | 'loading' | 'upload' | 'setting'
+export type PageType = 'home' | 'login' | 'loading' | 'upload' | 'setting' | 'history'
 
 function PopupContainer() {
   const [activeTab, setActivePage] = useState<PageType>('loading')
@@ -24,6 +25,7 @@ function PopupContainer() {
     loading: <LoadingPage loadingText="Loading..."></LoadingPage>,
     upload: <UploadPageForm setActivePage={setActivePage} />,
     setting: <SettingPage setActivePage={setActivePage} />,
+    history: <HistoryTaskList setActivePage={setActivePage}></HistoryTaskList>,
   }
 
   return (
