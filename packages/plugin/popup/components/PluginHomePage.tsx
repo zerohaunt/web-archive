@@ -21,7 +21,7 @@ function PluginHomePage({ setActivePage }: PluginHomePageProps) {
 
   return (
     <div className="w-64 space-y-1.5 p-4">
-      <div className="mb-4 flex justify-between">
+      <div className="h-6 mb-2 items-center flex justify-between">
         <div className="flex space-x-3">
           <House
             className="cursor-pointer"
@@ -50,7 +50,7 @@ function PluginHomePage({ setActivePage }: PluginHomePageProps) {
         />
       </div>
       <Button
-        className="w-full"
+        className="w-full select-none"
         onClick={() => { setActivePage('upload') }}
       >
         Save Page

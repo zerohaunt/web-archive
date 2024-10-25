@@ -1,16 +1,16 @@
 import { Input } from '@web-archive/shared/components/input'
 import { Label } from '@web-archive/shared/components/label'
 import type { PageType } from 'popup/PopupPage'
-import type { ChangeEvent, ReactNode } from 'react'
-import { useEffect, useState } from 'react'
-import { onMessage, sendMessage } from 'webext-bridge/popup'
+import type { ChangeEvent } from 'react'
+import { useState } from 'react'
+import { sendMessage } from 'webext-bridge/popup'
 import Browser from 'webextension-polyfill'
 import { Textarea } from '@web-archive/shared/components/textarea'
 import { Button } from '@web-archive/shared/components/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@web-archive/shared/components/select'
 import { useRequest } from 'ahooks'
 import Compressor from 'compressorjs'
-import { isNil, isNotEmptyArray } from '@web-archive/shared/utils'
+import { isNil } from '@web-archive/shared/utils'
 import { Loader2 } from 'lucide-react'
 import { getSingleFileSetting } from '../utils/singleFile'
 import LoadingPage from '~/popup/components/LoadingPage'
@@ -178,7 +178,7 @@ function UploadPageForm({ setActivePage }: UploadPageFormProps) {
 
   return (
     <div className="w-64 p-4 space-y-4 flex flex-col">
-      <div className="flex flex-col space-y-1.5">
+      <div className="flex flex-col space-y-2">
         <Label
           htmlFor="title"
         >
@@ -193,7 +193,7 @@ function UploadPageForm({ setActivePage }: UploadPageFormProps) {
         />
       </div>
 
-      <div className="flex flex-col space-y-1.5">
+      <div className="flex flex-col space-y-2">
         <Label
           htmlFor="pageDesc"
         >
@@ -209,7 +209,7 @@ function UploadPageForm({ setActivePage }: UploadPageFormProps) {
         </Textarea>
       </div>
 
-      <div className="flex flex-col space-y-1.5">
+      <div className="flex flex-col space-y-2">
         <Label
           htmlFor="folderId"
         >
