@@ -21,7 +21,6 @@ declare module 'webext-bridge' {
       }
     }, {}>
     'get-page-task-list': ProtocolWithReturn<{}, { taskList: Array<SeriableSingleFileTask> }>
-    'update-task-list': ProtocolWithReturn<{ taskList: Array<SeriableSingleFileTask> }>
     'clear-finished-task-list': ProtocolWithReturn<{}>
     'get-server-url': ProtocolWithReturn<{}, { serverUrl: string }>
     'set-server-url': ProtocolWithReturn<{ url: string }, { success: boolean }>

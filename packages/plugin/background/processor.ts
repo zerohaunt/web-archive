@@ -13,6 +13,8 @@ export interface SeriableSingleFileTask {
   title: string
   pageDesc: string
   folderId: string
+  startTimeStamp: number
+  endTimeStamp?: number
 }
 
 const taskList: SeriableSingleFileTask[] = []
@@ -25,10 +27,20 @@ async function initTask() {
 
   const { tasks } = await Browser.storage.local.get('tasks')
   if (tasks) {
-    taskList.push(...tasks)
+    tasks.forEach((task: SeriableSingleFileTask) => {
+      if (task.status !== 'done' && task.status !== 'failed') {
+        task.status = 'failed'
+        task.endTimeStamp = Date.now()
+      }
+    })
+    taskList.splice(0, taskList.length, ...tasks)
   }
   isInit = true
 }
+
+Browser.runtime.onStartup.addListener(async () => {
+  await initTask()
+})
 
 async function getTaskList() {
   await initTask()
@@ -37,7 +49,6 @@ async function getTaskList() {
 
 async function saveTaskList() {
   await Browser.storage.local.set({ tasks: taskList })
-  sendMessage('update-task-list', { taskList }, 'popup')
 }
 
 async function clearFinishedTaskList() {
@@ -99,6 +110,7 @@ async function createAndRunTask(options: CreateTaskOptions) {
     title,
     pageDesc,
     folderId,
+    startTimeStamp: Date.now(),
   }
 
   // todo wait refactor, add progress
@@ -112,12 +124,20 @@ async function createAndRunTask(options: CreateTaskOptions) {
 
     await uploadPageData({ content, href, title, pageDesc, folderId, screenshot })
     task.status = 'done'
+    task.endTimeStamp = Date.now()
     await saveTaskList()
   }
 
   taskList.push(task)
   await saveTaskList()
-  await run()
+  try {
+    await run()
+  }
+  catch (e) {
+    task.status = 'failed'
+    task.endTimeStamp = Date.now()
+    await saveTaskList()
+  }
 }
 
 export {
