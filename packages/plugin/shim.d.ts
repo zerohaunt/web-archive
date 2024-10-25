@@ -26,6 +26,8 @@ declare module 'webext-bridge' {
     'get-server-url': ProtocolWithReturn<{}, { serverUrl: string }>
     'set-server-url': ProtocolWithReturn<{ url: string }, { success: boolean }>
     'check-auth': ProtocolWithReturn<{}, { success: boolean }>
+    'login': ProtocolWithReturn<{}, { success: boolean }>
+    'logout': ProtocolWithReturn<{}>
     'get-token': ProtocolWithReturn<{}, { token: string }>
     'set-token': ProtocolWithReturn<{ token: string }, { success: boolean }>
     'get-all-folders': ProtocolWithReturn<{}, { folders: Array<{ id: number, name: string }> }>

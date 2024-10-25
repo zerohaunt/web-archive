@@ -10,7 +10,7 @@ interface PluginHomePageProps {
 
 function PluginHomePage({ setActivePage }: PluginHomePageProps) {
   async function logout() {
-    await sendMessage('set-token', { token: '' })
+    await sendMessage('logout', {})
     setActivePage('login')
   }
 

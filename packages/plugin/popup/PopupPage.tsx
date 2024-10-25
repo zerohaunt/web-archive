@@ -8,10 +8,10 @@ import PluginHomePage from '~/popup/components/PluginHomePage'
 import UploadPageForm from '~/popup/components/UploadPageForm'
 import LoadingPage from '~/popup/components/LoadingPage'
 
-export type PageType = 'home' | 'login' | 'loading' | 'upload' | 'setting' | 'history'
+export type PageType = 'home' | 'login' | 'loading' | 'upload' | 'setting' | 'history' | 'empty'
 
 function PopupContainer() {
-  const [activeTab, setActivePage] = useState<PageType>('loading')
+  const [activeTab, setActivePage] = useState<PageType>('empty')
 
   useEffect(() => {
     sendMessage('check-auth', {}).then(({ success }) => {
@@ -26,6 +26,7 @@ function PopupContainer() {
     upload: <UploadPageForm setActivePage={setActivePage} />,
     setting: <SettingPage setActivePage={setActivePage} />,
     history: <HistoryTaskList setActivePage={setActivePage}></HistoryTaskList>,
+    empty: <div></div>,
   }
 
   return (

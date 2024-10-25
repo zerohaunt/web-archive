@@ -10,7 +10,7 @@ function LoginPage({ setActivePage }: { setActivePage: (tab: PageType) => void }
   const [token, saveToken] = useToken()
 
   function checkAuth() {
-    sendMessage('check-auth', {}).then(({ success }) => {
+    sendMessage('login', {}).then(({ success }) => {
       if (success) {
         setActivePage('home')
       }

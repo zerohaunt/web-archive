@@ -3,6 +3,7 @@ import '~/lib/browser-polyfill.min.js'
 import '~/lib/single-file-background.js'
 import { onMessage } from 'webext-bridge/background'
 import { clearFinishedTaskList, createAndRunTask, getTaskList } from './processor'
+import { checkLoginStatus, getCacheLoginStatus, resetLoginStatus } from './login'
 
 async function appendAuthHeader(options?: RequestInit) {
   const { token } = await Browser.storage.local.get('token') ?? {}
@@ -35,6 +36,12 @@ export async function request(url: string, options?: RequestInit | undefined) {
 
     throw new Error(json.message)
   }
+
+  if (res.status === 401) {
+    await Browser.storage.local.set({ loginStatus: false })
+    throw new Error('Unauthorized')
+  }
+
   throw new Error('Failed to fetch')
 }
 
@@ -51,19 +58,19 @@ onMessage('get-server-url', async () => {
 })
 
 onMessage('check-auth', async () => {
-  try {
-    await request('/auth', {
-      method: 'POST',
-    })
-    return {
-      success: true,
-    }
+  return {
+    success: await getCacheLoginStatus(),
   }
-  catch {
-    return {
-      success: false,
-    }
+})
+
+onMessage('login', async () => {
+  return {
+    success: await checkLoginStatus(),
   }
+})
+
+onMessage('logout', async () => {
+  await resetLoginStatus()
 })
 
 onMessage('get-token', async () => {
