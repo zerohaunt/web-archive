@@ -10,7 +10,7 @@ import { Button } from '@web-archive/shared/components/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@web-archive/shared/components/select'
 import { useRequest } from 'ahooks'
 import Compressor from 'compressorjs'
-import { isNil } from '@web-archive/shared/utils'
+import { isNil, isNotEmptyArray } from '@web-archive/shared/utils'
 import { Loader2 } from 'lucide-react'
 import { getSingleFileSetting } from '../utils/singleFile'
 import LoadingPage from '~/popup/components/LoadingPage'
@@ -47,7 +47,6 @@ async function compressImage(base64: string) {
       width: Math.min(1280, width),
       height: Math.min(1280, width) * (height / width),
       success(result) {
-        console.log('compressed', result)
         resolve(result)
       },
     })
@@ -98,18 +97,6 @@ async function getAllFolders() {
   return folders
 }
 
-function ScrapingPageProgress({ stage }: { stage: string }) {
-  return (
-    <div className="text-center">
-      Scraping Page Data...
-      <br />
-      <span>
-        {stage}
-      </span>
-    </div>
-  )
-}
-
 function UploadPageForm({ setActivePage }: UploadPageFormProps) {
   const [uploadPageData, setUploadPageData] = useState({
     title: '',
@@ -118,6 +105,19 @@ function UploadPageForm({ setActivePage }: UploadPageFormProps) {
     folderId: undefined as undefined | string,
     screenshot: undefined as undefined | string,
   })
+
+  const { data: folderList, loading: loadingFolder } = useRequest(getAllFolders, {
+    cacheKey: 'folderList',
+  })
+
+  useEffect(() => {
+    if (isNil(uploadPageData.folderId) && isNotEmptyArray(folderList)) {
+      setUploadPageData(prevData => ({
+        ...prevData,
+        folderId: folderList[0].id.toString(),
+      }))
+    }
+  }, [folderList])
 
   function handleChange(e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLTextAreaElement> | ChangeEvent<HTMLSelectElement>) {
     const { name, value } = e.target
@@ -128,14 +128,13 @@ function UploadPageForm({ setActivePage }: UploadPageFormProps) {
   }
 
   function handleFolderSelect(newFolder: string) {
-    console.log('folder select', newFolder)
     setUploadPageData(prevData => ({
       ...prevData,
       folderId: newFolder,
     }))
   }
 
-  const { loading: isScrapingPage } = useRequest(
+  const { loading: isInitPageData } = useRequest(
     scrapePageData,
     {
       onSuccess: (data) => {
@@ -152,7 +151,7 @@ function UploadPageForm({ setActivePage }: UploadPageFormProps) {
   }
 
   async function handleSavePage() {
-    console.log('save page', uploadPageData)
+    // todo await folderlist to check folder extists?
     if (isNil(uploadPageData.folderId)) {
       // todo show error
       return
@@ -176,18 +175,7 @@ function UploadPageForm({ setActivePage }: UploadPageFormProps) {
     setActivePage('home')
   }
 
-  const { data: folderList, loading: loadingFolder } = useRequest(getAllFolders, {
-    onSuccess: (data) => {
-      if (isNil(uploadPageData.folderId) && data.length > 0) {
-        setUploadPageData(prevData => ({
-          ...prevData,
-          folderId: data[0].id.toString(),
-        }))
-      }
-    },
-  })
-
-  if (isScrapingPage) {
+  if (isInitPageData) {
     return (
       <LoadingPage
         loadingText="Scraping Page Data..."
@@ -264,7 +252,7 @@ function UploadPageForm({ setActivePage }: UploadPageFormProps) {
           onClick={handleSavePage}
         >
           {
-            loadingFolder
+            (isNil(folderList) && loadingFolder)
               ? (
                 <span className="flex items-center justify-center">
                   <Loader2 className="mr-2 h-4 w-4 animate-spin"></Loader2>

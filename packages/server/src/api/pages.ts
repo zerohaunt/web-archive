@@ -42,6 +42,8 @@ app.post(
   async (c) => {
     const { title, pageDesc = '', pageUrl, pageFile, folderId, screenshot } = c.req.valid('form')
 
+    // todo check folder exists?
+
     const [contentUrl, screenshotId] = await Promise.all([
       saveFileToBucket(c.env.BUCKET, pageFile),
       saveFileToBucket(c.env.BUCKET, screenshot),
