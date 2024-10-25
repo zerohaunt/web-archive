@@ -98,26 +98,18 @@ async function getAllFolders() {
 }
 
 function UploadPageForm({ setActivePage }: UploadPageFormProps) {
+  const lastChooseFolderId = localStorage.getItem('lastChooseFolderId') || undefined
   const [uploadPageData, setUploadPageData] = useState({
     title: '',
     pageDesc: '',
     href: '',
-    folderId: undefined as undefined | string,
+    folderId: lastChooseFolderId,
     screenshot: undefined as undefined | string,
   })
 
   const { data: folderList, loading: loadingFolder } = useRequest(getAllFolders, {
     cacheKey: 'folderList',
   })
-
-  useEffect(() => {
-    if (isNil(uploadPageData.folderId) && isNotEmptyArray(folderList)) {
-      setUploadPageData(prevData => ({
-        ...prevData,
-        folderId: folderList[0].id.toString(),
-      }))
-    }
-  }, [folderList])
 
   function handleChange(e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLTextAreaElement> | ChangeEvent<HTMLSelectElement>) {
     const { name, value } = e.target
@@ -128,6 +120,7 @@ function UploadPageForm({ setActivePage }: UploadPageFormProps) {
   }
 
   function handleFolderSelect(newFolder: string) {
+    localStorage.setItem('lastChooseFolderId', newFolder)
     setUploadPageData(prevData => ({
       ...prevData,
       folderId: newFolder,
