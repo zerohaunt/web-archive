@@ -33,5 +33,6 @@ declare module 'webext-bridge' {
     'scrape-page-progress': ProtocolWithReturn<{ stage: LoadStage }, {}>
     'scrape-page-progress-to-popup': ProtocolWithReturn<{ stage: LoadStage }, {}>
     'scrape-page-data': ProtocolWithReturn<SingleFileSetting, { content: string, title: string, href: string, pageDesc: string }>
+    'scrape-available': ProtocolWithReturn<{ tabId: number }, { available: boolean }>
   }
 }

@@ -1,6 +1,9 @@
 import { Button } from '@web-archive/shared/components/button'
+import { useRequest } from 'ahooks'
 import { History, House, LogOut, Settings } from 'lucide-react'
 import { sendMessage } from 'webext-bridge/popup'
+import { isNil } from '@web-archive/shared/utils'
+import { getCurrentTab } from '../utils/tab'
 import { ThemeToggle } from '~/popup/components/ThemeToggle'
 import type { PageType } from '~/popup/PopupPage'
 
@@ -18,6 +21,15 @@ function PluginHomePage({ setActivePage }: PluginHomePageProps) {
     const { serverUrl } = await sendMessage('get-server-url', {})
     window.open(serverUrl, '_blank')
   }
+
+  const { data: saveAvailabel } = useRequest(async () => {
+    const currentTab = await getCurrentTab()
+    if (isNil(currentTab?.id)) {
+      return false
+    }
+    const { available } = await sendMessage('scrape-available', { tabId: currentTab.id })
+    return available
+  })
 
   return (
     <div className="w-64 space-y-1.5 p-4">
@@ -51,9 +63,12 @@ function PluginHomePage({ setActivePage }: PluginHomePageProps) {
       </div>
       <Button
         className="w-full select-none"
+        disabled={!saveAvailabel}
         onClick={() => { setActivePage('upload') }}
       >
-        Save Page
+        {
+          !saveAvailabel ? 'Save Page (Not Available)' : 'Save Page'
+        }
       </Button>
     </div>
   )

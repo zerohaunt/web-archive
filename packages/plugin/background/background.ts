@@ -109,3 +109,18 @@ onMessage('get-page-task-list', async () => {
 onMessage('clear-finished-task-list', async () => {
   await clearFinishedTaskList()
 })
+
+onMessage('scrape-available', async ({ data: { tabId } }) => {
+  try {
+    await Browser.scripting.executeScript({
+      target: { tabId },
+      func: () => {
+        console.log('web-archive-scrape-available')
+      },
+    })
+    return { available: true }
+  }
+  catch (e) {
+    return { available: false }
+  }
+})
