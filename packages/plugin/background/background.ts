@@ -1,9 +1,9 @@
 import Browser from 'webextension-polyfill'
 import '~/lib/browser-polyfill.min.js'
 import '~/lib/single-file-background.js'
-import { onMessage, sendMessage } from 'webext-bridge/background'
-import { isNotNil } from '@web-archive/shared/utils'
-import { base64ToBlob } from '~/utils/file.js'
+import { onMessage } from 'webext-bridge/background'
+import { clearFinishedTaskList, createAndRunTask, getTaskList } from './processor'
+import { checkLoginStatus, getCacheLoginStatus, resetLoginStatus } from './login'
 
 async function appendAuthHeader(options?: RequestInit) {
   const { token } = await Browser.storage.local.get('token') ?? {}
@@ -22,7 +22,7 @@ async function appendAuthHeader(options?: RequestInit) {
 }
 
 /* global RequestInit */
-async function request(url: string, options?: RequestInit | undefined) {
+export async function request(url: string, options?: RequestInit | undefined) {
   const { serverUrl } = await Browser.storage.local.get('serverUrl')
   const res = await fetch(`${serverUrl}/api${url}`, {
     credentials: 'same-origin',
@@ -36,6 +36,12 @@ async function request(url: string, options?: RequestInit | undefined) {
 
     throw new Error(json.message)
   }
+
+  if (res.status === 401) {
+    await Browser.storage.local.set({ loginStatus: false })
+    throw new Error('Unauthorized')
+  }
+
   throw new Error('Failed to fetch')
 }
 
@@ -52,19 +58,19 @@ onMessage('get-server-url', async () => {
 })
 
 onMessage('check-auth', async () => {
-  try {
-    await request('/auth', {
-      method: 'POST',
-    })
-    return {
-      success: true,
-    }
+  return {
+    success: await getCacheLoginStatus(),
   }
-  catch {
-    return {
-      success: false,
-    }
+})
+
+onMessage('login', async () => {
+  return {
+    success: await checkLoginStatus(),
   }
+})
+
+onMessage('logout', async () => {
+  await resetLoginStatus()
 })
 
 onMessage('get-token', async () => {
@@ -87,32 +93,34 @@ onMessage('get-all-folders', async () => {
 })
 
 onMessage('add-save-page-task', async ({ data: { tabId, singleFileSetting, pageForm } }) => {
-  await Browser.scripting.executeScript({
-    target: { tabId },
-    files: ['/lib/single-file.js', '/lib/single-file-extension-core.js'],
+  createAndRunTask({
+    tabId,
+    singleFileSetting,
+    pageForm,
   })
-  const { content } = await sendMessage('scrape-page-data', singleFileSetting, `content-script@${tabId}`)
+})
 
-  const { href, title, pageDesc, folderId, screenshot } = pageForm
-
-  const form = new FormData()
-  form.append('title', title)
-  form.append('pageDesc', pageDesc)
-  form.append('pageUrl', href)
-  form.append('folderId', folderId)
-  form.append('pageFile', new Blob([content], { type: 'text/html' }))
-  if (isNotNil(screenshot)) {
-    form.append('screenshot', base64ToBlob(screenshot, 'image/webp'))
+onMessage('get-page-task-list', async () => {
+  return {
+    taskList: await getTaskList(),
   }
+})
 
+onMessage('clear-finished-task-list', async () => {
+  await clearFinishedTaskList()
+})
+
+onMessage('scrape-available', async ({ data: { tabId } }) => {
   try {
-    await request('/pages/upload_new_page', {
-      method: 'POST',
-      body: form,
+    await Browser.scripting.executeScript({
+      target: { tabId },
+      func: () => {
+        console.log('web-archive-scrape-available')
+      },
     })
-    return { success: true }
+    return { available: true }
   }
-  catch {
-    return { success: false }
+  catch (e) {
+    return { available: false }
   }
 })

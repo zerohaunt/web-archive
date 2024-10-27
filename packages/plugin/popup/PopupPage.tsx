@@ -1,16 +1,18 @@
 import { useEffect, useState } from 'react'
 
 import { sendMessage } from 'webext-bridge/popup'
+import { Toaster } from 'react-hot-toast'
+import HistoryTaskList from './components/HistoryTaskList'
 import SettingPage from '~/popup/components/SettingPage'
 import LoginPage from '~/popup/components/LoginPage'
 import PluginHomePage from '~/popup/components/PluginHomePage'
 import UploadPageForm from '~/popup/components/UploadPageForm'
 import LoadingPage from '~/popup/components/LoadingPage'
 
-export type PageType = 'home' | 'login' | 'loading' | 'upload' | 'setting'
+export type PageType = 'home' | 'login' | 'loading' | 'upload' | 'setting' | 'history' | 'empty'
 
 function PopupContainer() {
-  const [activeTab, setActivePage] = useState<PageType>('loading')
+  const [activeTab, setActivePage] = useState<PageType>('empty')
 
   useEffect(() => {
     sendMessage('check-auth', {}).then(({ success }) => {
@@ -24,10 +26,19 @@ function PopupContainer() {
     loading: <LoadingPage loadingText="Loading..."></LoadingPage>,
     upload: <UploadPageForm setActivePage={setActivePage} />,
     setting: <SettingPage setActivePage={setActivePage} />,
+    history: <HistoryTaskList setActivePage={setActivePage}></HistoryTaskList>,
+    empty: <div></div>,
   }
 
   return (
-    tabs[activeTab]
+    <div>
+      <Toaster
+        position="top-center"
+        reverseOrder={false}
+      >
+      </Toaster>
+      {tabs[activeTab]}
+    </div>
   )
 }
 

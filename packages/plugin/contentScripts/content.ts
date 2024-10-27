@@ -1,4 +1,4 @@
-import { onMessage, sendMessage } from 'webext-bridge/content-script'
+import { onMessage } from 'webext-bridge/content-script'
 import { getCurrentPageData } from '~/utils/singleFile'
 
 function createModal() {

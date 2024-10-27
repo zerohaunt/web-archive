@@ -23,26 +23,20 @@ function FolderPage() {
 
   const scrollRef = useRef<Ref>(null)
   const { keyword, searchTrigger } = useOutletContext<{ keyword: string, searchTrigger: boolean }>()
-  const totalCount = useRef(0)
   const PAGE_SIZE = 14
-  const pageNum = useRef(1)
   const { data: pagesData, loading: pagesLoading, mutate: setPageData, loadingMore, reload } = useInfiniteScroll(
-    async () => {
-      if (loadingMore) {
-        return {
-          list: [],
-        }
-      }
+    async (d) => {
+      const pageNumber = d?.pageNumber ?? 1
       const res = await queryPage({
         folderId: slug,
-        pageNumber: pageNum.current,
+        pageNumber,
         pageSize: PAGE_SIZE,
         keyword,
       })
-      pageNum.current += 1
-      totalCount.current = res.total
       return {
         list: res.list ?? [],
+        pageNumber: pageNumber + 1,
+        total: res.total,
       }
     },
     {
@@ -50,12 +44,11 @@ function FolderPage() {
       isNoMore: (d) => {
         if (!d)
           return false
-        return d.list.length === totalCount.current
+        return d.pageNumber > (d.total / PAGE_SIZE)
       },
     },
   )
   useEffect(() => {
-    pageNum.current = 1
     reload()
   }, [searchTrigger, slug])
 

@@ -2,6 +2,7 @@ import { sendMessage } from 'webext-bridge/popup'
 import { Button } from '@web-archive/shared/components/button'
 import { Label } from '@web-archive/shared/components/label'
 import { Input } from '@web-archive/shared/components/input'
+import toast from 'react-hot-toast'
 import { useServerUrl, useToken } from '~/popup/composable/server'
 import type { PageType } from '~/popup/PopupPage'
 
@@ -10,12 +11,12 @@ function LoginPage({ setActivePage }: { setActivePage: (tab: PageType) => void }
   const [token, saveToken] = useToken()
 
   function checkAuth() {
-    sendMessage('check-auth', {}).then(({ success }) => {
+    sendMessage('login', {}).then(({ success }) => {
       if (success) {
         setActivePage('home')
       }
       else {
-        console.log('auth failed')
+        toast.error('Authentication failed')
       }
     })
   }
