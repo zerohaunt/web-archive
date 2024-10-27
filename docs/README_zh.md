@@ -10,6 +10,21 @@ Web Archive 是一个网页归档工具，包含以下几个部分：
 
 服务端基于 Cloudflare Worker 的全套服务，包含 D1 数据库、R2 存储桶。
 
+## Why
+大多数网页归档工具，比如 archivebox，都是基于服务器调用无头浏览器抓取的方式进行归档。  
+这种做法的弊端是 知乎、medium 这种需要登录的网站操作很麻烦，需要配置 token 或 cookie。  
+同时无头浏览器对服务器的要求也比较高，大多数都是 nas 用户在使用。  
+web-archive 是一个完全免费、无门槛的方案，而且 Cloudflare 可以非常方便的将数据迁移回本地转为 self-host。  
+
+## feat & roadmap
+- [x] 文件夹分类
+- [x] 页面预览图
+- [x] 标题关键字查询
+- [x] 橱窗，可以分享自己抓取的页面
+- [x] 移动端适配
+- [ ] tag 分类系统
+- [ ] 将页面保存为 markdown
+
 ## 部署指南
 Github Actions 一键部署(推荐)  
 
@@ -133,3 +148,6 @@ The project you specified does not exist: "web-archive". Would you like to creat
 
 在 release 页面下载最新的 extension.zip，解压后安装到浏览器中。  
 首次安装后，需要输入 API 地址和密钥，API 地址是服务地址，密钥就是首个用户（管理员）的密码。  
+
+在文件夹页面，你可以设置某个页面是否在橱窗中展示。  
+橱窗地址：/#/showcase/folder
