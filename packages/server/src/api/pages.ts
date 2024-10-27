@@ -96,14 +96,17 @@ app.post(
       c.env.DB,
       { folderId: Number(folderId), pageNumber, pageSize, keyword },
     )
-    const pageWidthScreenshot = await Promise.all(pages.map(async (page) => {
+    const loadScreenshotPromise = Promise.all(pages.map(async (page) => {
       const screenshot = await getBase64FileFromBucket(c.env.BUCKET, page.screenshotId, 'image/png')
       return {
         ...page,
         screenshot,
       }
     }))
-    const total = await selectPageTotalCount(c.env.DB, { folderId: Number(folderId), keyword })
+    const [pageWidthScreenshot, total] = await Promise.all([
+      loadScreenshotPromise,
+      selectPageTotalCount(c.env.DB, { folderId: Number(folderId), keyword }),
+    ])
     return c.json(result.success({ list: pageWidthScreenshot, total }))
   },
 )
