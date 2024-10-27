@@ -8,8 +8,7 @@ import { Textarea } from '@web-archive/shared/components/textarea'
 import { Button } from '@web-archive/shared/components/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@web-archive/shared/components/select'
 import { useRequest } from 'ahooks'
-import { isNil } from '@web-archive/shared/utils'
-import { Loader2 } from 'lucide-react'
+import { isNil, isNotNil } from '@web-archive/shared/utils'
 import toast from 'react-hot-toast'
 import { getSingleFileSetting } from '~/popup/utils/singleFile'
 import { takeScreenshot } from '~/popup/utils/screenshot'
@@ -60,8 +59,17 @@ function UploadPageForm({ setActivePage }: UploadPageFormProps) {
     screenshot: undefined as undefined | string,
   })
 
-  const { data: folderList, loading: loadingFolder } = useRequest(getAllFolders, {
+  const { data: folderList } = useRequest(getAllFolders, {
     cacheKey: 'folderList',
+    onSuccess: (data) => {
+      if (isNotNil(uploadPageData.folderId) && !data.some(folder => folder.id.toString() === uploadPageData.folderId)) {
+        setUploadPageData(prevData => ({
+          ...prevData,
+          folderId: undefined,
+        }))
+        lastChooseFolderId && localStorage.removeItem('lastChooseFolderId')
+      }
+    },
   })
 
   function handleChange(e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLTextAreaElement> | ChangeEvent<HTMLSelectElement>) {
@@ -198,18 +206,7 @@ function UploadPageForm({ setActivePage }: UploadPageFormProps) {
           disabled={isNil(uploadPageData.folderId)}
           onClick={handleSavePage}
         >
-          {
-            (isNil(folderList) && loadingFolder)
-              ? (
-                <span className="flex items-center justify-center">
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin"></Loader2>
-                  Loading
-                </span>
-                )
-              : (
-                  'Confirm'
-                )
-          }
+          Confirm
         </Button>
       </div>
     </div>
