@@ -1,4 +1,7 @@
 ## Web Archive
+
+![showcase](https://raw.githubusercontent.com/ray-d-song/web-archive/main/docs/imgs/showcase.gif)
+
 Web Archive 是一个网页归档工具，包含以下几个部分：
 
 - 浏览器插件：将网页保存为网页快照，并上传到服务端。
@@ -125,3 +128,8 @@ The project you specified does not exist: "web-archive". Would you like to creat
 ✨ Deployment complete! Take a peek over at https://web-archive-xxxx.pages.dev
 ```
 </details>
+
+## 使用指南
+
+在 release 页面下载最新的 extension.zip，解压后安装到浏览器中。  
+首次安装后，需要输入 API 地址和密钥，API 地址是服务地址，密钥就是首个用户（管理员）的密码。  

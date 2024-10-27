@@ -5,6 +5,8 @@
 
 ## Web Archive
 
+![showcase](https://raw.githubusercontent.com/ray-d-song/web-archive/main/docs/imgs/showcase.gif)
+
 Web Archive is a free web archiving and sharing service based on Cloudflare, including the following parts:  
 
 - Browser plugin: Save the webpage as a single html file and upload it to the server.
@@ -131,3 +133,8 @@ The project you specified does not exist: "web-archive". Would you like to creat
 ✨ Deployment complete! Take a peek over at https://web-archive-xxxx.pages.dev
 ```
 </details>
+
+## Usage Guide
+
+Download the latest extension.zip from the release page, unzip it, and install it to the browser.  
+After the first installation, you need to enter the API address and key. The API address is the service address, and the key is the password of the first user (administrator).  
