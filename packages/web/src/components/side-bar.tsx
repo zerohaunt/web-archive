@@ -3,14 +3,17 @@ import { Button } from '@web-archive/shared/components/button'
 import { LogOut, Plus, Settings, Trash } from 'lucide-react'
 import type { Folder as FolderType, Page } from '@web-archive/shared/types'
 import Folder from '@web-archive/shared/components/folder'
+import { Skeleton } from '@web-archive/shared/components/skeleton'
 import { useRequest } from 'ahooks'
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import { isNil, isNumberString } from '@web-archive/shared/utils'
 import { useLocation } from 'react-router-dom'
+import SkeletonWrapper from '@web-archive/shared/components/skelton-wrapper'
 import NewFolderDialog from './new-folder-dialog'
 import EditFolderDialog from './edit-folder-dialog'
 import SettingDialog from './setting-dialog'
+import Hamburger from './hamburger'
 import { useNavigate, useParams } from '~/router'
 import emitter from '~/utils/emitter'
 import { deleteFolder, getAllFolder } from '~/data/folder'
@@ -28,7 +31,7 @@ function getNextFolderId(folders: Array<FolderType>, index: number) {
 
 function SideBar() {
   const navigate = useNavigate()
-  const { data: folders, refresh, mutate: setFolders } = useRequest(getAllFolder)
+  const { data: folders, refresh, mutate: setFolders, loading: foldersLoading } = useRequest(getAllFolder)
 
   const [openedFolder, setOpenedFolder] = useState<number | null>(null)
   const handleFolderClick = (id: number) => {
@@ -98,8 +101,11 @@ function SideBar() {
 
   const [settingDialogOpen, setSettingDialogOpen] = useState(false)
 
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+
   return (
-    <div className="w-64 h-screen shadow-lg dark:shadow-zinc-600 dark:shadow-sm">
+    <div className={`w-64 h-screen shadow-lg bg-white dark:bg-[#020817] dark:shadow-zinc-600 dark:shadow-sm transition-all duration-300 fixed lg:relative lg:block lg:z-auto z-50 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      <Hamburger className="lg:hidden block absolute top-[50%] right-[-2.2rem] cursor-pointer" onClick={() => setIsSidebarOpen(prev => !prev)} />
       <NewFolderDialog afterSubmit={refresh} open={newFolderDialogOpen} setOpen={setNewFolderDialogOpen} />
       <EditFolderDialog
         afterSubmit={refresh}
@@ -111,25 +117,38 @@ function SideBar() {
       <div className="h-screen">
         <div className="p-4 min-h-full flex flex-col">
           <div className="flex space-x-2">
-            <Button className="flex-1 text-sm justify-center opacity-60 hover:opacity-100 transition-opacity duration-300" onClick={() => setNewFolderDialogOpen(true)}>
+            <Button className="flex-1 text-sm justify-center" onClick={() => setNewFolderDialogOpen(true)}>
               <Plus className="w-5 h-5 mr-2" />
               New Folder
             </Button>
           </div>
           <ScrollArea className="h-[calc(100vh-210px)]">
             <ul className="flex flex-col gap-2 justify-center items-center py-4">
-              {folders?.map(folder => (
-                <Folder
-                  key={folder.id}
-                  name={folder.name}
-                  id={folder.id}
-                  isOpen={openedFolder === folder.id}
-                  onClick={handleFolderClick}
-                  onDropPage={(page) => { handleDropPage(folder.id, page) }}
-                  onDelete={handleDeleteFolder}
-                  onEdit={handleEditFolder}
-                />
-              ))}
+              <SkeletonWrapper
+                loadingDeps={foldersLoading}
+                skeleton={(
+                  <>
+                    {Array.from({ length: 3 }).map((_, index) => (
+                      <Skeleton key={index} className="w-full h-10" />
+                    ))}
+                  </>
+                )}
+              >
+                {
+                folders?.map(folder => (
+                  <Folder
+                    key={folder.id}
+                    name={folder.name}
+                    id={folder.id}
+                    isOpen={openedFolder === folder.id}
+                    onClick={handleFolderClick}
+                    onDropPage={(page) => { handleDropPage(folder.id, page) }}
+                    onDelete={handleDeleteFolder}
+                    onEdit={handleEditFolder}
+                  />
+                ))
+              }
+              </SkeletonWrapper>
             </ul>
           </ScrollArea>
           <div className="border-b border-gray-200 dark:border-gray-800 my-2" />

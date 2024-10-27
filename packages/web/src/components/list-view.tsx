@@ -39,7 +39,7 @@ function ListView({ pages, children, imgPreview, onItemClick }: ListViewProps) {
       <TableBody>
         {pages?.map(page => (
           <TableRow key={page.id} className="cursor-pointer z-10" onClick={() => handleClickPage(page)} onMouseEnter={e => handleHoverPage(e, page)} onMouseLeave={handleLeavePage}>
-            <TableCell>{page.title}</TableCell>
+            <TableCell className="line-clamp-3">{page.title}</TableCell>
             <TableCell>{page.createdAt.toLocaleString()}</TableCell>
             {children && (
               <TableCell>

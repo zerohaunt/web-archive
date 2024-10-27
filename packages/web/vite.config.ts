@@ -13,7 +13,7 @@ export default defineConfig({
     port: 7749,
     proxy: {
       '/api': {
-        target: 'http://localhost:9981/',
+        target: 'https://web-archive-egm.pages.dev',
         changeOrigin: true,
       },
     },
