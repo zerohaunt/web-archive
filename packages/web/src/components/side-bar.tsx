@@ -104,7 +104,7 @@ function SideBar() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
   return (
-    <div className={`w-64 h-screen shadow-lg bg-white dark:bg-[#020817] dark:shadow-zinc-600 dark:shadow-sm transition-all duration-300 fixed lg:relative lg:block lg:z-auto z-50 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+    <div className={`w-64 h-screen shadow-lg bg-white dark:bg-[#020817] dark:shadow-zinc-600 dark:shadow-sm transition-all duration-300 fixed lg:relative lg:block lg:z-auto z-50 lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
       <Hamburger className="lg:hidden block absolute top-[50%] right-[-2.2rem] cursor-pointer" onClick={() => setIsSidebarOpen(prev => !prev)} />
       <NewFolderDialog afterSubmit={refresh} open={newFolderDialogOpen} setOpen={setNewFolderDialogOpen} />
       <EditFolderDialog
