@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 
 import { sendMessage } from 'webext-bridge/popup'
+import { Toaster } from 'react-hot-toast'
 import HistoryTaskList from './components/HistoryTaskList'
 import SettingPage from '~/popup/components/SettingPage'
 import LoginPage from '~/popup/components/LoginPage'
@@ -30,7 +31,14 @@ function PopupContainer() {
   }
 
   return (
-    tabs[activeTab]
+    <div>
+      <Toaster
+        position="top-center"
+        reverseOrder={false}
+      >
+      </Toaster>
+      {tabs[activeTab]}
+    </div>
   )
 }
 

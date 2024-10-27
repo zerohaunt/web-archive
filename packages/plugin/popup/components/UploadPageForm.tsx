@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useRequest } from 'ahooks'
 import { isNil } from '@web-archive/shared/utils'
 import { Loader2 } from 'lucide-react'
+import toast from 'react-hot-toast'
 import { getSingleFileSetting } from '~/popup/utils/singleFile'
 import { takeScreenshot } from '~/popup/utils/screenshot'
 import { getCurrentTab } from '~/popup/utils/tab'
@@ -98,12 +99,12 @@ function UploadPageForm({ setActivePage }: UploadPageFormProps) {
   async function handleSavePage() {
     // todo await folderlist to check folder extists?
     if (isNil(uploadPageData.folderId)) {
-      // todo show error
+      toast.error('Please select a folder')
       return
     }
     const tab = await getCurrentTab()
     if (isNil(tab.id)) {
-      // todo show error
+      toast.error('Can not get current tab info')
       return
     }
     await sendMessage('add-save-page-task', {
@@ -117,6 +118,7 @@ function UploadPageForm({ setActivePage }: UploadPageFormProps) {
         screenshot: uploadPageData.screenshot,
       },
     })
+    toast.success('Add save page task success')
     setActivePage('home')
   }
 
