@@ -61,6 +61,13 @@ function UploadPageForm({ setActivePage }: UploadPageFormProps) {
 
   const { data: folderList } = useRequest(getAllFolders, {
     cacheKey: 'folderList',
+    setCache: (data) => {
+      localStorage.setItem('folderList', JSON.stringify(data))
+    },
+    getCache: () => {
+      const cache = localStorage.getItem('folderList')
+      return cache ? JSON.parse(cache) : []
+    },
     onSuccess: (data) => {
       if (isNotNil(uploadPageData.folderId) && !data.some(folder => folder.id.toString() === uploadPageData.folderId)) {
         setUploadPageData(prevData => ({
