@@ -10,24 +10,18 @@ import LoadingMore from '~/components/loading-more'
 
 function ShowcaseFolderPage() {
   const scrollRef = useRef<Ref>(null)
-  const totalCount = useRef(0)
   const PAGE_SIZE = 14
-  const pageNum = useRef(1)
-  const { data: pagesData, loading: pagesLoading, mutate: setPageData, loadingMore, reload } = useInfiniteScroll(
-    async () => {
-      if (loadingMore) {
-        return {
-          list: [],
-        }
-      }
+  const { data: pagesData, loading: pagesLoading, loadingMore } = useInfiniteScroll(
+    async (d) => {
+      const pageNumber = d?.pageNumber ?? 1
       const res = await queryShowcase({
-        pageNumber: pageNum.current,
+        pageNumber,
         pageSize: PAGE_SIZE,
       })
-      pageNum.current += 1
-      totalCount.current = res.total
       return {
         list: res.list ?? [],
+        pageNumber: pageNumber + 1,
+        total: res.total,
       }
     },
     {
@@ -35,7 +29,7 @@ function ShowcaseFolderPage() {
       isNoMore: (d) => {
         if (!d)
           return false
-        return d.list.length === totalCount.current
+        return d.pageNumber > (d.total / PAGE_SIZE)
       },
     },
   )
@@ -46,7 +40,7 @@ function ShowcaseFolderPage() {
         <LoadingWrapper loading={pagesLoading || (!pagesData)}>
           <div className="h-full">
             <EmptyWrapper empty={pagesData?.list.length === 0}>
-              <CardView pages={pagesData?.list} onPageDelete={() => {}} />
+              <CardView pages={pagesData?.list} onPageDelete={() => { }} />
             </EmptyWrapper>
             {loadingMore && <LoadingMore />}
           </div>
