@@ -1,6 +1,9 @@
 import { Button } from '@web-archive/shared/components/button'
-import { House, LogOut, Settings } from 'lucide-react'
+import { useRequest } from 'ahooks'
+import { History, House, LogOut, Settings } from 'lucide-react'
 import { sendMessage } from 'webext-bridge/popup'
+import { isNil } from '@web-archive/shared/utils'
+import { getCurrentTab } from '../utils/tab'
 import { ThemeToggle } from '~/popup/components/ThemeToggle'
 import type { PageType } from '~/popup/PopupPage'
 
@@ -10,7 +13,7 @@ interface PluginHomePageProps {
 
 function PluginHomePage({ setActivePage }: PluginHomePageProps) {
   async function logout() {
-    await sendMessage('set-token', { token: '' })
+    await sendMessage('logout', {})
     setActivePage('login')
   }
 
@@ -19,9 +22,18 @@ function PluginHomePage({ setActivePage }: PluginHomePageProps) {
     window.open(serverUrl, '_blank')
   }
 
+  const { data: saveAvailabel } = useRequest(async () => {
+    const currentTab = await getCurrentTab()
+    if (isNil(currentTab?.id)) {
+      return false
+    }
+    const { available } = await sendMessage('scrape-available', { tabId: currentTab.id })
+    return available
+  })
+
   return (
     <div className="w-64 space-y-1.5 p-4">
-      <div className="mb-4 flex justify-between">
+      <div className="h-6 mb-2 items-center flex justify-between">
         <div className="flex space-x-3">
           <House
             className="cursor-pointer"
@@ -36,6 +48,11 @@ function PluginHomePage({ setActivePage }: PluginHomePageProps) {
             onClick={() => { setActivePage('setting') }}
           >
           </Settings>
+          <History
+            className="cursor-pointer"
+            size={16}
+            onClick={() => { setActivePage('history') }}
+          />
         </div>
 
         <LogOut
@@ -45,10 +62,13 @@ function PluginHomePage({ setActivePage }: PluginHomePageProps) {
         />
       </div>
       <Button
-        className="w-full"
+        className="w-full select-none"
+        disabled={!saveAvailabel}
         onClick={() => { setActivePage('upload') }}
       >
-        Save Page
+        {
+          !saveAvailabel ? 'Save Page (Not Available)' : 'Save Page'
+        }
       </Button>
     </div>
   )

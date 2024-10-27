@@ -4,68 +4,19 @@ import type { PageType } from 'popup/PopupPage'
 import type { ChangeEvent } from 'react'
 import { useState } from 'react'
 import { sendMessage } from 'webext-bridge/popup'
-import Browser from 'webextension-polyfill'
 import { Textarea } from '@web-archive/shared/components/textarea'
 import { Button } from '@web-archive/shared/components/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@web-archive/shared/components/select'
 import { useRequest } from 'ahooks'
-import Compressor from 'compressorjs'
-import { isNil } from '@web-archive/shared/utils'
-import { Loader2 } from 'lucide-react'
-import { getSingleFileSetting } from '../utils/singleFile'
+import { isNil, isNotNil } from '@web-archive/shared/utils'
+import toast from 'react-hot-toast'
+import { getSingleFileSetting } from '~/popup/utils/singleFile'
+import { takeScreenshot } from '~/popup/utils/screenshot'
+import { getCurrentTab } from '~/popup/utils/tab'
 import LoadingPage from '~/popup/components/LoadingPage'
-import { base64ToBlob, blobToBase64 } from '~/utils/file'
 
 interface UploadPageFormProps {
   setActivePage: (page: PageType) => void
-}
-
-async function getImageSize(base64: string) {
-  return new Promise<{
-    height: number
-    width: number
-  }>((resolve) => {
-    const img = new Image()
-    img.src = base64
-    img.onload = () => {
-      resolve({
-        height: img.height,
-        width: img.width,
-      })
-    }
-  })
-}
-
-async function compressImage(base64: string) {
-  const { height, width } = await getImageSize(base64)
-  const blob = base64ToBlob(base64)
-  const compressedFile = await new Promise<Blob>((resolve) => {
-    // eslint-disable-next-line no-new -- to compress image
-    new Compressor(blob, {
-      quality: 0.6,
-      mimeType: 'image/webp',
-      width: Math.min(1280, width),
-      height: Math.min(1280, width) * (height / width),
-      success(result) {
-        console.log('compressed', result)
-        resolve(result)
-      },
-    })
-  })
-  return await blobToBase64(compressedFile)
-}
-
-async function takeScreenshot(windowId: number | undefined): Promise<string | undefined> {
-  if (isNil(windowId)) {
-    return undefined
-  }
-  const screenshot = await Browser.tabs.captureVisibleTab(windowId)
-  return await compressImage(screenshot)
-}
-
-async function getCurrentTab() {
-  const tabs = await Browser.tabs.query({ active: true, currentWindow: true })
-  return tabs[0]
 }
 
 async function scrapePageData() {
@@ -98,25 +49,34 @@ async function getAllFolders() {
   return folders
 }
 
-function ScrapingPageProgress({ stage }: { stage: string }) {
-  return (
-    <div className="text-center">
-      Scraping Page Data...
-      <br />
-      <span>
-        {stage}
-      </span>
-    </div>
-  )
-}
-
 function UploadPageForm({ setActivePage }: UploadPageFormProps) {
+  const lastChooseFolderId = localStorage.getItem('lastChooseFolderId') || undefined
   const [uploadPageData, setUploadPageData] = useState({
     title: '',
     pageDesc: '',
     href: '',
-    folderId: undefined as undefined | string,
+    folderId: lastChooseFolderId,
     screenshot: undefined as undefined | string,
+  })
+
+  const { data: folderList } = useRequest(getAllFolders, {
+    cacheKey: 'folderList',
+    setCache: (data) => {
+      localStorage.setItem('folderList', JSON.stringify(data))
+    },
+    getCache: () => {
+      const cache = localStorage.getItem('folderList')
+      return cache ? JSON.parse(cache) : []
+    },
+    onSuccess: (data) => {
+      if (isNotNil(uploadPageData.folderId) && !data.some(folder => folder.id.toString() === uploadPageData.folderId)) {
+        setUploadPageData(prevData => ({
+          ...prevData,
+          folderId: undefined,
+        }))
+        lastChooseFolderId && localStorage.removeItem('lastChooseFolderId')
+      }
+    },
   })
 
   function handleChange(e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLTextAreaElement> | ChangeEvent<HTMLSelectElement>) {
@@ -128,14 +88,14 @@ function UploadPageForm({ setActivePage }: UploadPageFormProps) {
   }
 
   function handleFolderSelect(newFolder: string) {
-    console.log('folder select', newFolder)
+    localStorage.setItem('lastChooseFolderId', newFolder)
     setUploadPageData(prevData => ({
       ...prevData,
       folderId: newFolder,
     }))
   }
 
-  const { loading: isScrapingPage } = useRequest(
+  const { loading: isInitPageData } = useRequest(
     scrapePageData,
     {
       onSuccess: (data) => {
@@ -152,14 +112,14 @@ function UploadPageForm({ setActivePage }: UploadPageFormProps) {
   }
 
   async function handleSavePage() {
-    console.log('save page', uploadPageData)
+    // todo await folderlist to check folder extists?
     if (isNil(uploadPageData.folderId)) {
-      // todo show error
+      toast.error('Please select a folder')
       return
     }
     const tab = await getCurrentTab()
     if (isNil(tab.id)) {
-      // todo show error
+      toast.error('Can not get current tab info')
       return
     }
     await sendMessage('add-save-page-task', {
@@ -173,21 +133,11 @@ function UploadPageForm({ setActivePage }: UploadPageFormProps) {
         screenshot: uploadPageData.screenshot,
       },
     })
+    toast.success('Add save page task success')
     setActivePage('home')
   }
 
-  const { data: folderList, loading: loadingFolder } = useRequest(getAllFolders, {
-    onSuccess: (data) => {
-      if (isNil(uploadPageData.folderId) && data.length > 0) {
-        setUploadPageData(prevData => ({
-          ...prevData,
-          folderId: data[0].id.toString(),
-        }))
-      }
-    },
-  })
-
-  if (isScrapingPage) {
+  if (isInitPageData) {
     return (
       <LoadingPage
         loadingText="Scraping Page Data..."
@@ -197,7 +147,7 @@ function UploadPageForm({ setActivePage }: UploadPageFormProps) {
 
   return (
     <div className="w-64 p-4 space-y-4 flex flex-col">
-      <div className="flex flex-col space-y-1.5">
+      <div className="flex flex-col space-y-2">
         <Label
           htmlFor="title"
         >
@@ -212,7 +162,7 @@ function UploadPageForm({ setActivePage }: UploadPageFormProps) {
         />
       </div>
 
-      <div className="flex flex-col space-y-1.5">
+      <div className="flex flex-col space-y-2">
         <Label
           htmlFor="pageDesc"
         >
@@ -228,7 +178,7 @@ function UploadPageForm({ setActivePage }: UploadPageFormProps) {
         </Textarea>
       </div>
 
-      <div className="flex flex-col space-y-1.5">
+      <div className="flex flex-col space-y-2">
         <Label
           htmlFor="folderId"
         >
@@ -263,18 +213,7 @@ function UploadPageForm({ setActivePage }: UploadPageFormProps) {
           disabled={isNil(uploadPageData.folderId)}
           onClick={handleSavePage}
         >
-          {
-            loadingFolder
-              ? (
-                <span className="flex items-center justify-center">
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin"></Loader2>
-                  Loading
-                </span>
-                )
-              : (
-                  'Confirm'
-                )
-          }
+          Confirm
         </Button>
       </div>
     </div>
