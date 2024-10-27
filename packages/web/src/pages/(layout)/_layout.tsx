@@ -18,9 +18,7 @@ function Layout() {
         position="top-center"
         reverseOrder={false}
       />
-      <div className="w-64">
-        <SideBar />
-      </div>
+      <SideBar />
       <div className="flex-1 flex flex-col">
         <Header keyword={keyword} setKeyword={setKeyword} handleSearch={handleSearch} />
         <Outlet context={{ keyword, searchTrigger }} />

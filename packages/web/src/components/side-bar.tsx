@@ -13,6 +13,7 @@ import SkeletonWrapper from '@web-archive/shared/components/skelton-wrapper'
 import NewFolderDialog from './new-folder-dialog'
 import EditFolderDialog from './edit-folder-dialog'
 import SettingDialog from './setting-dialog'
+import Hamburger from './hamburger'
 import { useNavigate, useParams } from '~/router'
 import emitter from '~/utils/emitter'
 import { deleteFolder, getAllFolder } from '~/data/folder'
@@ -100,8 +101,11 @@ function SideBar() {
 
   const [settingDialogOpen, setSettingDialogOpen] = useState(false)
 
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+
   return (
-    <div className="w-64 h-screen shadow-lg dark:shadow-zinc-600 dark:shadow-sm">
+    <div className={`w-64 h-screen shadow-lg bg-white dark:bg-[#020817] dark:shadow-zinc-600 dark:shadow-sm transition-all duration-300 fixed lg:relative lg:block lg:z-auto z-50 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      <Hamburger className="lg:hidden block absolute top-[50%] right-[-2.2rem] cursor-pointer" onClick={() => setIsSidebarOpen(prev => !prev)} />
       <NewFolderDialog afterSubmit={refresh} open={newFolderDialogOpen} setOpen={setNewFolderDialogOpen} />
       <EditFolderDialog
         afterSubmit={refresh}
@@ -113,7 +117,7 @@ function SideBar() {
       <div className="h-screen">
         <div className="p-4 min-h-full flex flex-col">
           <div className="flex space-x-2">
-            <Button className="flex-1 text-sm justify-center opacity-60 hover:opacity-100 transition-opacity duration-300" onClick={() => setNewFolderDialogOpen(true)}>
+            <Button className="flex-1 text-sm justify-center" onClick={() => setNewFolderDialogOpen(true)}>
               <Plus className="w-5 h-5 mr-2" />
               New Folder
             </Button>

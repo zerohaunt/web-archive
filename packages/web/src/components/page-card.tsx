@@ -59,7 +59,7 @@ function PageCard({ page, onPageDelete }: { page: Page, onPageDelete?: (page: Pa
       className="cursor-pointer hover:shadow-lg transition-shadow flex flex-col relative group"
     >
       <CardHeader>
-        <CardTitle className="leading-8 text-lg">{page.title}</CardTitle>
+        <CardTitle className="leading-8 text-lg line-clamp-2">{page.title}</CardTitle>
       </CardHeader>
       <CardContent className="flex-1">
         {
