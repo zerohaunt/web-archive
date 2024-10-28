@@ -7,6 +7,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@web-a
 import { ExternalLink, Eye, EyeOff, SquarePen, Trash } from 'lucide-react'
 import { useLocation } from 'react-router-dom'
 import toast from 'react-hot-toast'
+import ScreenshotView from './screenshot-view'
 import { useNavigate } from '~/router'
 import { updatePageShowcase } from '~/data/page'
 import CardEditDialog from '~/components/card-edit-dialog'
@@ -59,11 +60,12 @@ function PageCard({ page, onPageDelete }: { page: Page, onPageDelete?: (page: Pa
           <CardTitle className="leading-8 text-lg line-clamp-2">{page.title}</CardTitle>
         </CardHeader>
         <CardContent className="flex-1">
-          {
-          page.screenshot && (
-            <img src={page.screenshot} className="mb-2" />
-          )
-        }
+          <ScreenshotView
+            screenshotId={page.screenshotId}
+            className="w-full mb-2"
+            loadingClassName="w-full h-48"
+          >
+          </ScreenshotView>
           <p className="h-auto text-sm text-gray-600 dark:text-gray-400 line-clamp-3">{page.pageDesc}</p>
         </CardContent>
         <CardFooter className="flex space-x-2 justify-end w-full backdrop-blur-sm py-4 absolute bottom-0 group-hover:opacity-100 opacity-0 transition-opacity">

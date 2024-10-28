@@ -5,7 +5,7 @@ import type { HonoTypeUserInformation } from '~/constants/binding'
 import result from '~/utils/result'
 import { clearDeletedPage, deletePageById, getPageById, insertPage, queryDeletedPage, queryPage, restorePage, selectPageTotalCount } from '~/model/page'
 import { getFolderById, restoreFolder } from '~/model/folder'
-import { getBase64FileFromBucket, saveFileToBucket } from '~/utils/file'
+import { getFileFromBucket, saveFileToBucket } from '~/utils/file'
 import type { Page } from '~/sql/types'
 import { updateShowcase } from '~/model/showcase'
 
@@ -92,22 +92,14 @@ app.post(
   async (c) => {
     const { folderId, pageNumber, pageSize, keyword } = c.req.valid('json')
 
-    const pages = await queryPage(
-      c.env.DB,
-      { folderId: Number(folderId), pageNumber, pageSize, keyword },
-    )
-    const loadScreenshotPromise = Promise.all(pages.map(async (page) => {
-      const screenshot = await getBase64FileFromBucket(c.env.BUCKET, page.screenshotId, 'image/png')
-      return {
-        ...page,
-        screenshot,
-      }
-    }))
-    const [pageWidthScreenshot, total] = await Promise.all([
-      loadScreenshotPromise,
+    const [pages, total] = await Promise.all([
+      queryPage(
+        c.env.DB,
+        { folderId: Number(folderId), pageNumber, pageSize, keyword },
+      ),
       selectPageTotalCount(c.env.DB, { folderId: Number(folderId), keyword }),
     ])
-    return c.json(result.success({ list: pageWidthScreenshot, total }))
+    return c.json(result.success({ list: pages, total }))
   },
 )
 
@@ -316,6 +308,29 @@ app.put(
     const updateResult = await updateShowcase(c.env.DB, { id, isShowcased })
 
     return c.json(result.success(updateResult))
+  },
+)
+
+app.get(
+  '/screenshot',
+  validator('query', (value, c) => {
+    if (isNil(value.id) || typeof value.id !== 'string') {
+      return c.json(result.error(400, 'ID is required'))
+    }
+
+    return {
+      id: value.id,
+    }
+  }),
+  async (c) => {
+    const { id } = c.req.valid('query')
+
+    const screenshot = await getFileFromBucket(c.env.BUCKET, id)
+
+    c.res.headers.set('Content-Type', 'image/webp')
+    c.res.headers.set('cache-control', 'public, max-age=31536000')
+
+    return c.body(await screenshot.arrayBuffer())
   },
 )
 
