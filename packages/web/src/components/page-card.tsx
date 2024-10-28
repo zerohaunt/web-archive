@@ -49,7 +49,7 @@ function PageCard({ page, onPageDelete }: { page: Page, onPageDelete?: (page: Pa
   const [openCardEditDialog, setOpenCardEditDialog] = useState(false)
 
   return (
-    <>
+    <div>
       <CardEditDialog open={openCardEditDialog} onOpenChange={setOpenCardEditDialog} pageId={page.id} />
       <Card
         key={page.id}
@@ -70,28 +70,28 @@ function PageCard({ page, onPageDelete }: { page: Page, onPageDelete?: (page: Pa
         </CardContent>
         <CardFooter className="flex space-x-2 justify-end w-full backdrop-blur-sm py-4 absolute bottom-0 group-hover:opacity-100 opacity-0 transition-opacity">
           {
-          !isShowcased && (
-            <TooltipProvider delayDuration={200}>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      setOpenCardEditDialog(true)
-                    }}
-                  >
-                    <SquarePen className="w-5 h-5" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  Edit page
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          )
-        }
+            !isShowcased && (
+              <TooltipProvider delayDuration={200}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setOpenCardEditDialog(true)
+                      }}
+                    >
+                      <SquarePen className="w-5 h-5" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    Edit page
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )
+          }
 
           <TooltipProvider delayDuration={200}>
             <Tooltip>
@@ -107,49 +107,49 @@ function PageCard({ page, onPageDelete }: { page: Page, onPageDelete?: (page: Pa
           </TooltipProvider>
 
           {
-          !isShowcased && (
-            <>
-              <TooltipProvider delayDuration={200}>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button variant="outline" size="sm" onClick={handleDeletePage}>
-                      <Trash className="w-5 h-5" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    Delete this page
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-              <TooltipProvider delayDuration={200}>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        updateShowcase({ id: page.id, isShowcased: showcaseSate === 1 ? 0 : 1 })
-                      }}
-                    >
+            !isShowcased && (
+              <>
+                <TooltipProvider delayDuration={200}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button variant="outline" size="sm" onClick={handleDeletePage}>
+                        <Trash className="w-5 h-5" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      Delete this page
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+                <TooltipProvider delayDuration={200}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          updateShowcase({ id: page.id, isShowcased: showcaseSate === 1 ? 0 : 1 })
+                        }}
+                      >
+                        {
+                          showcaseSate === 1 ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />
+                        }
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
                       {
-                        showcaseSate === 1 ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />
+                        showcaseSate === 1 ? 'Remove from showcase' : 'Show in showcase'
                       }
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    {
-                      showcaseSate === 1 ? 'Remove from showcase' : 'Show in showcase'
-                    }
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </>
-          )
-        }
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </>
+            )
+          }
         </CardFooter>
       </Card>
-    </>
+    </div>
   )
 }
 
