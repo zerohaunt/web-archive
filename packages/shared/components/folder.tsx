@@ -1,38 +1,23 @@
 import { Folder as FolderIcon, FolderOpen as FolderOpenIcon, Pencil, Trash } from 'lucide-react'
 import { useRef, useState } from 'react'
-import { useDrop } from 'ahooks'
-import { Page } from 'types'
-import { ContextMenu, ContextMenuContent, ContextMenuShortcut, ContextMenuItem, ContextMenuTrigger } from './context-menu'
+import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from './context-menu'
 
 interface FolderProps {
   id: number
   name: string
   isOpen: boolean
   onClick?: (id: number) => void
-  onDropPage?: (page: Page) => void
   onDelete?: (folderId: number) => void
   onEdit?: (folderId: number) => void
 }
 
-function Folder({ id, name, isOpen, onClick, onDropPage, onDelete, onEdit }: FolderProps) {
+function Folder({ id, name, isOpen, onClick, onDelete, onEdit }: FolderProps) {
   function handleClick() {
     onClick?.(id)
   }
 
   const folderRef = useRef(null)
   const [isHover, setIsHover] = useState(false)
-  useDrop(folderRef, {
-    onDom: (content) => {
-      setIsHover(false)
-      onDropPage?.(content)
-    },
-    onDragEnter: () => {
-      setIsHover(true)
-    },
-    onDragLeave: () => {
-      setIsHover(false)
-    }
-  })
 
   return (
     <ContextMenu>
