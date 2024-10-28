@@ -50,7 +50,11 @@ function PageCard({ page, onPageDelete }: { page: Page, onPageDelete?: (page: Pa
 
   return (
     <div>
-      <CardEditDialog open={openCardEditDialog} onOpenChange={setOpenCardEditDialog} pageId={page.id} />
+      {
+        !isShowcased && (
+          <CardEditDialog open={openCardEditDialog} onOpenChange={setOpenCardEditDialog} pageId={page.id} />
+        )
+      }
       <Card
         key={page.id}
         onClick={() => handleClickPageCard(page)}
