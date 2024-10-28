@@ -5,7 +5,7 @@ import type { HonoTypeUserInformation } from '~/constants/binding'
 import result from '~/utils/result'
 import { clearDeletedPage, deletePageById, getPageById, insertPage, queryDeletedPage, queryPage, restorePage, selectPageTotalCount } from '~/model/page'
 import { getFolderById, restoreFolder } from '~/model/folder'
-import { getBase64FileFromBucket, saveFileToBucket } from '~/utils/file'
+import { getBase64FileFromBucket, getFileFromBucket, saveFileToBucket } from '~/utils/file'
 import type { Page } from '~/sql/types'
 import { updateShowcase } from '~/model/showcase'
 
@@ -305,6 +305,29 @@ app.put(
     const updateResult = await updateShowcase(c.env.DB, { id, isShowcased })
 
     return c.json(result.success(updateResult))
+  },
+)
+
+app.get(
+  '/screenshot',
+  validator('query', (value, c) => {
+    if (isNil(value.id) || typeof value.id !== 'string') {
+      return c.json(result.error(400, 'ID is required'))
+    }
+
+    return {
+      id: value.id,
+    }
+  }),
+  async (c) => {
+    const { id } = c.req.valid('query')
+
+    const screenshot = await getFileFromBucket(c.env.BUCKET, id)
+
+    c.res.headers.set('Content-Type', 'image/webp')
+    c.res.headers.set('cache-control', 'public, max-age=31536000')
+
+    return c.body(await screenshot.arrayBuffer())
   },
 )
 

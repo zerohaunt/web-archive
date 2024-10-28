@@ -2,6 +2,7 @@ import type { Page } from '@web-archive/shared/types'
 import { Table, TableBody, TableCell, TableRow } from '@web-archive/shared/components/table'
 import { useState } from 'react'
 import { useMouse } from 'ahooks'
+import ScreenshotView from './screenshot-view'
 
 interface ListViewProps {
   pages?: Page[]
@@ -13,16 +14,16 @@ interface ListViewProps {
 function ListView({ pages, children, imgPreview, onItemClick }: ListViewProps) {
   const mouse = useMouse()
 
-  const [prevImg, setPrevImg] = useState<string | null>(null)
+  const [prevScreenshotId, setPrevScreenshotId] = useState<string | null>(null)
   const handleClickPage = (page: Page) => {
     onItemClick?.(page)
   }
   const handleHoverPage = (e: React.MouseEvent, page: Page) => {
     if (imgPreview)
-      setPrevImg(page.screenshot ?? null)
+      setPrevScreenshotId(page.screenshotId ?? null)
   }
   const handleLeavePage = () => {
-    setPrevImg(null)
+    setPrevScreenshotId(null)
   }
 
   return (
@@ -34,7 +35,16 @@ function ListView({ pages, children, imgPreview, onItemClick }: ListViewProps) {
           left: mouse.pageX,
         }}
       >
-        {prevImg && <img src={prevImg} alt="page preview" className="max-w-xs shadow-lg rounded" />}
+        {
+          prevScreenshotId
+          && (
+            <ScreenshotView
+              screenshotId={prevScreenshotId}
+              className="max-w-xs shadow-lg rounded"
+              loadingClassName="max-w-xs shadow-lg rounded w-xs h-40"
+            />
+          )
+        }
       </div>
       <TableBody>
         {pages?.map(page => (

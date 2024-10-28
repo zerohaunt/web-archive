@@ -1,4 +1,5 @@
 import type { Page } from '@web-archive/shared/types'
+import { isNil } from '@web-archive/shared/utils'
 import fetcher from '~/utils/fetcher'
 
 function getPageDetail(id: string): Promise<Page> {
@@ -78,6 +79,22 @@ function clearDeletedPage(): Promise<boolean> {
   })
 }
 
+function getPageScreenshot(screenshotId: string | null) {
+  return async () => {
+    if (isNil(screenshotId))
+      return null
+    await new Promise(resolve => setTimeout(resolve, 2000))
+    const res = await fetch(`/api/pages/screenshot?id=${screenshotId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'image/webp',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+      },
+    })
+    return await res.blob()
+  }
+}
+
 export {
   getPageDetail,
   deletePage,
@@ -87,4 +104,5 @@ export {
   restorePage,
   clearDeletedPage,
   updatePageShowcase,
+  getPageScreenshot,
 }
