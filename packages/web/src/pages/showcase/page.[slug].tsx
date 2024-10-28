@@ -2,6 +2,7 @@ import { Button } from '@web-archive/shared/components/button'
 import { useKeyPress, useRequest } from 'ahooks'
 import { ArrowLeft, ArrowRight, House } from 'lucide-react'
 import { useEffect } from 'react'
+import PoweredBy from '~/components/powerd-by'
 import { getNextShowcasePageId } from '~/data/showcase'
 import { useNavigate, useParams } from '~/router'
 
@@ -71,12 +72,13 @@ function ShowcasePage() {
 
   return (
     <main className="min-h-screen flex flex-col">
-      <div className="w-screen z-20 fixed">
+      <div className="w-screen z-20 fixed flex justify-between items-center">
         <Button variant="ghost" onClick={goHome} className="m-2">
           <House className="w-8 h-8" />
         </Button>
+        <PoweredBy />
       </div>
-      <div className="flex flex-1 pt-16">
+      <div className="flex flex-1 pt-20">
         <nav className="p-2 justify-between items-center hidden xl:flex">
           <Button variant="ghost" size="sm" onClick={goBack} className="h-full">
             <ArrowLeft className="w-5 h-5" />
