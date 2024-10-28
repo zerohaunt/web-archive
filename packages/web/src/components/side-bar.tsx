@@ -1,7 +1,7 @@
 import { ScrollArea } from '@web-archive/shared/components/scroll-area'
 import { Button } from '@web-archive/shared/components/button'
 import { LogOut, Plus, Settings, Trash } from 'lucide-react'
-import type { Folder as FolderType, Page } from '@web-archive/shared/types'
+import type { Folder as FolderType } from '@web-archive/shared/types'
 import Folder from '@web-archive/shared/components/folder'
 import { Skeleton } from '@web-archive/shared/components/skeleton'
 import { useRequest } from 'ahooks'
@@ -17,7 +17,6 @@ import Hamburger from './hamburger'
 import { useNavigate, useParams } from '~/router'
 import emitter from '~/utils/emitter'
 import { deleteFolder, getAllFolder } from '~/data/folder'
-import { updatePage } from '~/data/page'
 
 function getNextFolderId(folders: Array<FolderType>, index: number) {
   if (index === 0 && folders.length === 1) {
@@ -87,18 +86,6 @@ function SideBar() {
     navigate('/login')
   }
 
-  const handleDropPage = async (folderId: number, page: Page) => {
-    if (!page || page.folderId === folderId)
-      return
-
-    await updatePage({
-      id: page.id,
-      folderId,
-    })
-    toast.success('Page moved successfully')
-    emitter.emit('movePage', { pageId: page.id, folderId })
-  }
-
   const [settingDialogOpen, setSettingDialogOpen] = useState(false)
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
@@ -142,7 +129,6 @@ function SideBar() {
                     id={folder.id}
                     isOpen={openedFolder === folder.id}
                     onClick={handleFolderClick}
-                    onDropPage={(page) => { handleDropPage(folder.id, page) }}
                     onDelete={handleDeleteFolder}
                     onEdit={handleEditFolder}
                   />

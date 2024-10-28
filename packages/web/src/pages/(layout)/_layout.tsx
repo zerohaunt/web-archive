@@ -21,7 +21,7 @@ function Layout() {
       <SideBar />
       <div className="flex-1 flex flex-col">
         <Header keyword={keyword} setKeyword={setKeyword} handleSearch={handleSearch} />
-        <Outlet context={{ keyword, searchTrigger }} />
+        <Outlet context={{ keyword, searchTrigger, handleSearch }} />
       </div>
     </main>
   )

@@ -40,7 +40,6 @@ app.post(
 
 app.get('/content', async (c) => {
   const pageId = c.req.query('pageId')
-  console.log(pageId)
   // redirect to 404
   if (!pageId) {
     return c.redirect('/error')
