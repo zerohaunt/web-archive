@@ -6,7 +6,6 @@ type Page = {
   folderId: number
   pageDesc: string
   screenshotId: string | null
-  screenshot: string | null
   isDeleted: number
   deletedAt: Date | null
   createdAt: Date

@@ -83,7 +83,6 @@ function getPageScreenshot(screenshotId: string | null) {
   return async () => {
     if (isNil(screenshotId))
       return null
-    await new Promise(resolve => setTimeout(resolve, 2000))
     const res = await fetch(`/api/pages/screenshot?id=${screenshotId}`, {
       method: 'GET',
       headers: {

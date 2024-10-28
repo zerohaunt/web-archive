@@ -17,10 +17,13 @@ function ScreenshotView({ screenshotId, className, loadingClassName }: Screensho
     {
       onSuccess: (data) => {
         if (isNil(data))
-          return
+          return setScreenshot(null)
         setScreenshot(data)
       },
+      refreshDeps: [screenshotId],
+      loadingDelay: 100,
     },
+
   )
 
   return (
