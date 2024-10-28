@@ -7,6 +7,7 @@ import CardView from '~/components/card-view'
 import EmptyWrapper from '~/components/empty-wrapper'
 import { queryShowcase } from '~/data/showcase'
 import LoadingMore from '~/components/loading-more'
+import PoweredBy from '~/components/powerd-by'
 
 function ShowcaseFolderPage() {
   const scrollRef = useRef<Ref>(null)
@@ -36,7 +37,8 @@ function ShowcaseFolderPage() {
 
   return (
     <div className="flex flex-col flex-1">
-      <ScrollArea ref={scrollRef} className="p-4 overflow-auto h-[calc(100vh-58px)]">
+      <PoweredBy />
+      <ScrollArea ref={scrollRef} className="p-4 overflow-auto h-[calc(100vh-84px)]">
         <LoadingWrapper loading={pagesLoading || (!pagesData)}>
           <div className="h-full">
             <EmptyWrapper empty={pagesData?.list.length === 0}>
