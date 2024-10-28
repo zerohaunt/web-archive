@@ -56,6 +56,10 @@ function restorePage(id: number): Promise<boolean> {
 function updatePage(body: {
   id: number
   folderId: number
+  title: string
+  isShowcased: number
+  pageDesc?: string
+  pageUrl?: string
 }): Promise<Page> {
   return fetcher<Page>('/pages/update_page', {
     method: 'PUT',

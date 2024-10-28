@@ -160,18 +160,30 @@ app.put(
       return c.json(result.error(400, 'Folder ID should be a number'))
     }
 
+    if (!value.title || typeof value.title !== 'string') {
+      return c.json(result.error(400, 'Title is required'))
+    }
+
+    if (typeof value.isShowcased !== 'number') {
+      return c.json(result.error(400, 'isShowcased is required'))
+    }
+
     return {
       id: Number(value.id),
-      folderId: isNotNil(value.folderId) ? Number(value.folderId) : undefined,
+      folderId: Number(value.folderId),
+      title: value.title,
+      isShowcased: value.isShowcased,
+      pageDesc: value.pageDesc ?? '',
+      pageUrl: value.pageUrl ?? '',
     }
   }),
   async (c) => {
-    const { id, folderId } = c.req.valid('json')
+    const { id, folderId, title, isShowcased, pageDesc, pageUrl } = c.req.valid('json')
     if (isNotNil(folderId)) {
       const updateResult = await c.env.DB.prepare(
-        'UPDATE pages SET folderId = ? WHERE id = ?',
+        'UPDATE pages SET folderId = ?, title = ?, pageDesc = ?, pageUrl = ?, isShowcased = ? WHERE id = ?',
       )
-        .bind(folderId, id)
+        .bind(folderId, title, pageDesc, pageUrl, isShowcased, id)
         .run()
       if (!updateResult.error) {
         return c.json(result.success(null))
@@ -247,7 +259,6 @@ app.delete(
 
 app.get('/content', async (c) => {
   const pageId = c.req.query('pageId')
-  console.log(pageId)
   // redirect to 404
   if (!pageId) {
     return c.redirect('/error')

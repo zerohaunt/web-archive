@@ -5,6 +5,8 @@
 
 ## Web Archive
 
+![showcase](https://raw.githubusercontent.com/ray-d-song/web-archive/main/docs/imgs/showcase.gif)
+
 Web Archive is a free web archiving and sharing service based on Cloudflare, including the following parts:  
 
 - Browser plugin: Save the webpage as a single html file and upload it to the server.
@@ -12,6 +14,22 @@ Web Archive is a free web archiving and sharing service based on Cloudflare, inc
 - Web client: Query the html file and display it.
 
 The server is based on the full set of services of Cloudflare Worker, including D1 database and R2 storage bucket.
+
+## Why
+Most web archiving tools, like archivebox, are based on server-side calls to headless browsers to capture pages.  
+This approach has the following drawbacks:  
+- It is difficult to archive websites that require login, such as zhihu and Medium, as they need to configure tokens or cookies.
+- Headless browsers require higher server requirements, and most users are nas users.
+Web Archive is a completely free and zero-threshold solution, and Cloudflare can easily migrate the data back to the local host after self-hosting.
+
+## Feat & Roadmap
+- [x] Folder classification
+- [x] Page preview image
+- [x] Title keyword search
+- [x] Showcase, share the pages you captured
+- [x] Mobile support
+- [ ] Tag classification system
+- [ ] Save the page as markdown
 
 ## Deploy Guide
 Github Actions (Recommended)  
@@ -131,3 +149,11 @@ The project you specified does not exist: "web-archive". Would you like to creat
 ✨ Deployment complete! Take a peek over at https://web-archive-xxxx.pages.dev
 ```
 </details>
+
+## Usage Guide
+
+Download the latest extension.zip from the release page, unzip it, and install it to the browser.  
+After the first installation, you need to enter the API address and key. The API address is the service address, and the key is the password of the first user (administrator).  
+
+In the folder page, you can set whether a page is displayed in the showcase.  
+Showcase address: /#/showcase/folder
