@@ -32,9 +32,11 @@ Github Actions 一键部署(推荐)
 
 点击上面的按钮，按照 Cloudflare 的指引完成部署。  
 
-> **注意**：  
+> [!IMPORTANT]  
 > R2 存储桶是需要在 Cloudflare 面板上手动开通的功能，请开通后再进行部署或者失败后 re-run Github Actions。
-> 
+> 仅需开通 R2 功能，不需要创建存储桶，存储桶会在部署时自动创建。
+
+> [!NOTE]  
 > 创建令牌时，直接选择 `编辑 Cloudflare Workers` 模版，再手动添加 `D1 编辑` 权限。
 
 ![permissions](https://raw.githubusercontent.com/ray-d-song/web-archive/main/docs/imgs/perm_zh.png)

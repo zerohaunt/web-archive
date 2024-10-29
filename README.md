@@ -38,9 +38,11 @@ Github Actions (Recommended)
 
 Click the button above, follow the instructions of Cloudflare to complete the deployment.  
  
-> **Note**：  
+> [!IMPORTANT]  
 > R2 storage bucket is a feature that needs to be manually enabled in the Cloudflare panel, please enable it before deployment or re-run Github Actions after failure.
-> 
+> You only need to enable the R2 feature, no need to create a storage bucket, the storage bucket will be created automatically during deployment.  
+
+> [!NOTE]  
 > When creating a token, select the `Edit Cloudflare Workers` template directly, and then manually add the `D1 Edit` permission.
 
 ![permissions](https://raw.githubusercontent.com/ray-d-song/web-archive/main/docs/imgs/perm.png)  
