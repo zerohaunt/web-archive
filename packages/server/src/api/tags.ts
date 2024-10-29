@@ -2,7 +2,7 @@ import { isNil, isNumberString } from '@web-archive/shared/utils'
 import { Hono } from 'hono'
 import { validator } from 'hono/validator'
 import type { HonoTypeUserInformation } from '~/constants/binding'
-import { insertTag, selectAllTags, updateTag } from '~/model/tag'
+import { getTagById, insertTag, selectAllTags, updateTag } from '~/model/tag'
 import result from '~/utils/result'
 
 const app = new Hono<HonoTypeUserInformation>()
@@ -42,25 +42,82 @@ app.post(
     if (isNil(value.id) || !isNumberString(value.id)) {
       return c.json(result.error(400, 'ID is required'))
     }
-    if (isNil(value.name) && isNil(value.color) && isNil(value.pageIds)) {
-      return c.json(result.error(400, 'Name, color, or pageIds is required'))
+    if (isNil(value.name) && isNil(value.color)) {
+      return c.json(result.error(400, 'At least one field is required'))
     }
 
     return {
       id: Number(value.id),
       name: value.name,
       color: value.color,
-      pageIds: value.pageIds as Array<number> | undefined,
     }
   }),
   async (c) => {
-    const { id, name, color, pageIds } = c.req.valid('json')
+    const { id, name, color } = c.req.valid('json')
 
-    if (await updateTag(c.env.DB, { id, name, color, pageIds })) {
+    if (await updateTag(c.env.DB, { id, name, color })) {
       return c.json(result.success(true))
     }
 
     return c.json(result.error(500, 'Failed to update tag'))
+  },
+)
+
+app.post(
+  '/bind_page',
+  validator('json', (value, c) => {
+    if (isNil(value.id) || !isNumberString(value.id)) {
+      return c.json(result.error(400, 'ID is required'))
+    }
+    if (isNil(value.pageIds) || !Array.isArray(value.pageIds)) {
+      return c.json(result.error(400, 'Page ID is required'))
+    }
+
+    return {
+      id: Number(value.id),
+      pageIds: value.pageIds as Array<number>,
+    }
+  }),
+  async (c) => {
+    const { id, pageIds } = c.req.valid('json')
+
+    // todo use kv to avoid concurrency issue?
+    const tag = await getTagById(c.env.DB, id)
+    tag.pageIds.push(...pageIds)
+    tag.pageIds = Array.from(new Set(tag.pageIds))
+    if (await updateTag(c.env.DB, { id, pageIds: tag.pageIds })) {
+      return c.json(result.success(true))
+    }
+
+    return c.json(result.error(500, 'Failed to bind pages'))
+  },
+)
+
+app.post(
+  '/unbind_page',
+  validator('json', (value, c) => {
+    if (isNil(value.id) || !isNumberString(value.id)) {
+      return c.json(result.error(400, 'ID is required'))
+    }
+    if (isNil(value.pageIds) || !Array.isArray(value.pageIds)) {
+      return c.json(result.error(400, 'Page ID is required'))
+    }
+
+    return {
+      id: Number(value.id),
+      pageIds: value.pageIds as Array<number>,
+    }
+  }),
+  async (c) => {
+    const { id, pageIds } = c.req.valid('json')
+
+    const tag = await getTagById(c.env.DB, id)
+    tag.pageIds = tag.pageIds.filter(pageId => !pageIds.includes(pageId))
+    if (await updateTag(c.env.DB, { id, pageIds: tag.pageIds })) {
+      return c.json(result.success(true))
+    }
+
+    return c.json(result.error(500, 'Failed to unbind pages'))
   },
 )
 

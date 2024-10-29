@@ -28,7 +28,10 @@ async function getTagById(DB: D1Database, id: number) {
     WHERE id = ?
   `
   const tag = await DB.prepare(sql).bind(id).first<Tag>()
-  return tag
+  return {
+    ...tag,
+    pageIds: JSON.parse(tag.pageIds) as Array<number>,
+  }
 }
 
 async function insertTag(DB: D1Database, options: { name: string, color: string }) {

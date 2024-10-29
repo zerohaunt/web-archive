@@ -1,8 +1,8 @@
 import { isNotNil } from '@web-archive/shared/utils'
 import type { Page } from '~/sql/types'
 
-async function selectPageTotalCount(DB: D1Database, options: { folderId: number, keyword?: string }) {
-  const { folderId, keyword } = options
+async function selectPageTotalCount(DB: D1Database, options: { folderId: number, keyword?: string, tagId?: number }) {
+  const { folderId, keyword, tagId } = options
   let sql = `
     SELECT COUNT(*) as count FROM pages
     WHERE folderId = ? AND isDeleted = 0
@@ -12,12 +12,18 @@ async function selectPageTotalCount(DB: D1Database, options: { folderId: number,
     sql += ` AND title LIKE ?`
     bindParams.push(`${keyword}%`)
   }
+
+  if (isNotNil(tagId)) {
+    sql += ` AND id IN (SELECT value FROM json_each((SELECT pageIds FROM tags WHERE id = ?)))`
+    bindParams.push(tagId)
+  }
+
   const result = await DB.prepare(sql).bind(...bindParams).first()
   return result.count
 }
 
-async function queryPage(DB: D1Database, options: { folderId: number, pageNumber?: number, pageSize?: number, keyword?: string }) {
-  const { folderId, pageNumber, pageSize, keyword } = options
+async function queryPage(DB: D1Database, options: { folderId: number, pageNumber?: number, pageSize?: number, keyword?: string, tagId?: number }) {
+  const { folderId, pageNumber, pageSize, keyword, tagId } = options
   let sql = `
     SELECT
       id,
@@ -38,6 +44,11 @@ async function queryPage(DB: D1Database, options: { folderId: number, pageNumber
   if (keyword) {
     sql += ` AND title LIKE ?`
     bindParams.push(`%${keyword}%`)
+  }
+
+  if (isNotNil(tagId)) {
+    sql += ` AND id IN (SELECT value FROM json_each((SELECT pageIds FROM tags WHERE id = ?)))`
+    bindParams.push(tagId)
   }
 
   sql += ` ORDER BY createdAt DESC`

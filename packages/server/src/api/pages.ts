@@ -74,6 +74,10 @@ app.post(
       return c.json(result.error(400, 'Folder ID is required'))
     }
 
+    if (isNotNil(value.tagId) && !isNumberString(value.tagId)) {
+      return c.json(result.error(400, 'Tag ID should be a number'))
+    }
+
     if (value.pageNumber && !isNumberString(value.pageNumber)) {
       return c.json(result.error(400, 'Page number should be a number'))
     }
@@ -84,20 +88,21 @@ app.post(
 
     return {
       folderId: Number(value.folderId),
+      tagId: isNotNil(value.tagId) ? Number(value.tagId) : undefined,
       pageNumber: isNotNil(value.pageNumber) ? Number(value.pageNumber) : undefined,
       pageSize: isNotNil(value.pageSize) ? Number(value.pageSize) : undefined,
       keyword: value.keyword,
     }
   }),
   async (c) => {
-    const { folderId, pageNumber, pageSize, keyword } = c.req.valid('json')
+    const { folderId, pageNumber, pageSize, keyword, tagId } = c.req.valid('json')
 
     const [pages, total] = await Promise.all([
       queryPage(
         c.env.DB,
-        { folderId: Number(folderId), pageNumber, pageSize, keyword },
+        { folderId, pageNumber, pageSize, keyword, tagId },
       ),
-      selectPageTotalCount(c.env.DB, { folderId: Number(folderId), keyword }),
+      selectPageTotalCount(c.env.DB, { folderId, keyword, tagId }),
     ])
     return c.json(result.success({ list: pages, total }))
   },
