@@ -11,9 +11,16 @@ function CardView({ pages, onPageDelete }: { pages?: Page[], onPageDelete: (page
   )
 }
 
-function PageCardList({ pages, onPageDelete }: { pages?: Page[], onPageDelete: (page: Page) => void }) {
+interface PageCardListProps {
+  pages?: Page[]
+  onPageDelete: (page: Page) => void
+  children?: React.ReactNode
+}
+
+export function PageCardList({ pages, onPageDelete, children }: PageCardListProps) {
   return (
     <div className="flex flex-col space-y-4">
+      {children}
       {pages && pages.map(page => (
         <PageCard key={page.id} page={page} onPageDelete={onPageDelete} />
       ))}

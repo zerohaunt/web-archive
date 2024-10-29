@@ -6,7 +6,6 @@ on:
       - dev
       - main
       - hotfix
-      - new_card
 
 jobs:
   deploy:

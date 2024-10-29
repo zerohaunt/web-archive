@@ -16,6 +16,15 @@ async function selectPageTotalCount(DB: D1Database, options: { folderId: number,
   return result.count
 }
 
+async function selectAllPageCount(DB: D1Database) {
+  const sql = `
+    SELECT COUNT(*) as count FROM pages
+    WHERE isDeleted = 0
+  `
+  const result = await DB.prepare(sql).first()
+  return result.count
+}
+
 async function queryPage(DB: D1Database, options: { folderId: number, pageNumber?: number, pageSize?: number, keyword?: string }) {
   const { folderId, pageNumber, pageSize, keyword } = options
   let sql = `
@@ -151,6 +160,14 @@ async function clearDeletedPage(DB: D1Database) {
   return result.success
 }
 
+async function queryRecentSavePage(DB: D1Database) {
+  const sql = `
+    SELECT * FROM pages WHERE isDeleted = 0 ORDER BY createdAt DESC LIMIT 20
+  `
+  const result = await DB.prepare(sql).all<Page>()
+  return result.results
+}
+
 export {
   selectPageTotalCount,
   queryPage,
@@ -161,4 +178,6 @@ export {
   getPageById,
   insertPage,
   clearDeletedPage,
+  queryRecentSavePage,
+  selectAllPageCount,
 }
