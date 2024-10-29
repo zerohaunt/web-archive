@@ -37,12 +37,15 @@ Github Actions (Recommended)
 [![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/ray-d-song/web-archive)  
 
 Click the button above, follow the instructions of Cloudflare to complete the deployment.  
+ 
+> [!IMPORTANT]  
+> R2 storage bucket is a feature that needs to be manually enabled in the Cloudflare panel, please enable it before deployment or re-run Github Actions after failure.
+> You only need to enable the R2 feature, no need to create a storage bucket, the storage bucket will be created automatically during deployment.  
 
-In the stage of creating the token, the token needs at least the following permissions: D1, Workers R2 storage, and Workers permissions. My permission set is as follows:  
+> [!NOTE]  
+> When creating a token, select the `Edit Cloudflare Workers` template directly, and then manually add the `D1 Edit` permission.
 
 ![permissions](https://raw.githubusercontent.com/ray-d-song/web-archive/main/docs/imgs/perm.png)  
-
-> This is not the minimum permission set, if someone knows what the minimum permission set is, please help me update this document.
 
 Once deployed, please login as soon as possible, the first user to login will be set as the administrator.
 
