@@ -32,11 +32,12 @@ Github Actions 一键部署(推荐)
 
 点击上面的按钮，按照 Cloudflare 的指引完成部署。  
 
-在创建 token 的阶段，token 权限需要 D1、Workers R2 存储、Workers 的权限。我的权限集如下：  
+> **注意**：  
+> R2 存储桶是需要在 Cloudflare 面板上手动开通的功能，请开通后再进行部署或者失败后 re-run Github Actions。
+> 
+> 创建令牌时，直接选择 `编辑 Cloudflare Workers` 模版，再手动添加 `D1 编辑` 权限。
 
 ![permissions](https://raw.githubusercontent.com/ray-d-song/web-archive/main/docs/imgs/perm_zh.png)
-
-> 这并不是最小权限集，如果有人知道最小权限应该选哪些，可以帮我更新一下这个文档。
 
 部署后请尽快登录，首个登录的用户会被设置为管理员。
 
