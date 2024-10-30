@@ -38,6 +38,7 @@ function LoginPage({ setActivePage }: { setActivePage: (tab: PageType) => void }
         <Input
           id="token"
           placeholder="Enter the token"
+          type="password"
           value={token}
           onChange={saveToken}
         />
