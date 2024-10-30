@@ -20,9 +20,9 @@ function R2UsageCard() {
               objects
             </section>
             <section>
-              <span>{Math.round((data?.size ?? 0) / 1024 / 1024 / 1024)}</span>
+              <span>{Math.round((data?.size ?? 0) / 1024 / 1024)}</span>
               {' '}
-              GB
+              MB
             </section>
           </div>
         </CardContent>

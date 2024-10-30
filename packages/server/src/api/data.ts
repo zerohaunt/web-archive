@@ -12,9 +12,7 @@ app.get('/page_chart_data', async (c) => {
 })
 
 app.get('/r2_usage', async (c) => {
-  const res = await c.env.BUCKET.list({
-    prefix: 'web-archive',
-  })
+  const res = await c.env.BUCKET.list()
   return c.json(result.success({
     size: res.objects.reduce((acc, obj) => acc + obj.size, 0),
     count: res.objects.length,
