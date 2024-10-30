@@ -75,9 +75,19 @@ async function updateTag(DB: D1Database, options: { id: number, name?: string, c
   return sqlResult.success
 }
 
+async function deleteTagById(DB: D1Database, id: number) {
+  const sql = `
+    DELETE FROM tags
+    WHERE id = ?
+  `
+  const sqlResult = await DB.prepare(sql).bind(id).run()
+  return sqlResult.success
+}
+
 export {
   selectAllTags,
   insertTag,
   getTagById,
   updateTag,
+  deleteTagById,
 }

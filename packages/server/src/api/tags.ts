@@ -2,7 +2,7 @@ import { isNil, isNumberString } from '@web-archive/shared/utils'
 import { Hono } from 'hono'
 import { validator } from 'hono/validator'
 import type { HonoTypeUserInformation } from '~/constants/binding'
-import { getTagById, insertTag, selectAllTags, updateTag } from '~/model/tag'
+import { deleteTagById, getTagById, insertTag, selectAllTags, updateTag } from '~/model/tag'
 import result from '~/utils/result'
 
 const app = new Hono<HonoTypeUserInformation>()
@@ -60,6 +60,27 @@ app.post(
     }
 
     return c.json(result.error(500, 'Failed to update tag'))
+  },
+)
+
+app.delete(
+  '/delete',
+  validator('query', (value, c) => {
+    if (isNil(value.id) || !isNumberString(value.id)) {
+      return c.json(result.error(400, 'ID is required'))
+    }
+    return {
+      id: Number(value.id),
+    }
+  }),
+  async (c) => {
+    const { id } = c.req.valid('query')
+
+    if (await deleteTagById(c.env.DB, id)) {
+      return c.json(result.success(true))
+    }
+
+    return c.json(result.error(500, 'Failed to delete tag'))
   },
 )
 
