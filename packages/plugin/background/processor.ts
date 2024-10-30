@@ -15,6 +15,7 @@ export interface SeriableSingleFileTask {
   folderId: string
   startTimeStamp: number
   endTimeStamp?: number
+  errorMessage?: string
 }
 
 const taskList: SeriableSingleFileTask[] = []
@@ -31,6 +32,7 @@ async function initTask() {
       if (task.status !== 'done' && task.status !== 'failed') {
         task.status = 'failed'
         task.endTimeStamp = Date.now()
+        task.errorMessage = 'unexpected shutdown'
       }
     })
     taskList.splice(0, taskList.length, ...tasks)
@@ -39,6 +41,7 @@ async function initTask() {
 }
 
 Browser.runtime.onStartup.addListener(async () => {
+  console.log('onStartup')
   await initTask()
 })
 
@@ -133,9 +136,11 @@ async function createAndRunTask(options: CreateTaskOptions) {
   try {
     await run()
   }
-  catch (e) {
+  catch (e: any) {
     task.status = 'failed'
     task.endTimeStamp = Date.now()
+    console.error('tsak failed', e, task)
+    task.errorMessage = typeof e === 'string' ? e : e.message
     await saveTaskList()
   }
 }
