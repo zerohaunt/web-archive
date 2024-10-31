@@ -1,6 +1,7 @@
 import { Skeleton } from '@web-archive/shared/components/skeleton'
 import { isNil } from '@web-archive/shared/utils'
 import { useRequest } from 'ahooks'
+import { memo } from 'react'
 import { getPageScreenshot } from '~/data/page'
 import { useObjectURL } from '~/hooks/useObjectUrl'
 
@@ -10,7 +11,7 @@ interface ScreenshotViewProps {
   screenshotId: string | null
 }
 
-function ScreenshotView({ screenshotId, className, loadingClassName }: ScreenshotViewProps) {
+const ScreenshotView = memo(({ screenshotId, className, loadingClassName }: ScreenshotViewProps) => {
   const { objectURL: screenshot, setObject: setScreenshot } = useObjectURL(null)
   const { loading: screenshotLoading } = useRequest(
     getPageScreenshot(screenshotId),
@@ -23,7 +24,6 @@ function ScreenshotView({ screenshotId, className, loadingClassName }: Screensho
       refreshDeps: [screenshotId],
       loadingDelay: 100,
     },
-
   )
 
   return (
@@ -35,6 +35,6 @@ function ScreenshotView({ screenshotId, className, loadingClassName }: Screensho
         <img src={screenshot} className={className} />
         )
   )
-}
+})
 
 export default ScreenshotView

@@ -9,7 +9,6 @@ import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import { isNil, isNumberString } from '@web-archive/shared/utils'
 import { useLocation } from 'react-router-dom'
-import SkeletonWrapper from '@web-archive/shared/components/skelton-wrapper'
 import NewFolderDialog from './new-folder-dialog'
 import EditFolderDialog from './edit-folder-dialog'
 import SettingDialog from './setting-dialog'
@@ -111,30 +110,27 @@ function SideBar() {
           </div>
           <ScrollArea className="h-[calc(100vh-210px)]">
             <ul className="flex flex-col gap-2 justify-center items-center py-4">
-              <SkeletonWrapper
-                loadingDeps={foldersLoading}
-                skeleton={(
+              {foldersLoading
+                ? (
                   <>
                     {Array.from({ length: 3 }).map((_, index) => (
                       <Skeleton key={index} className="w-full h-10" />
                     ))}
                   </>
-                )}
-              >
-                {
-                folders?.map(folder => (
-                  <Folder
-                    key={folder.id}
-                    name={folder.name}
-                    id={folder.id}
-                    isOpen={openedFolder === folder.id}
-                    onClick={handleFolderClick}
-                    onDelete={handleDeleteFolder}
-                    onEdit={handleEditFolder}
-                  />
-                ))
-              }
-              </SkeletonWrapper>
+                  )
+                : (
+                    folders?.map(folder => (
+                      <Folder
+                        key={folder.id}
+                        name={folder.name}
+                        id={folder.id}
+                        isOpen={openedFolder === folder.id}
+                        onClick={handleFolderClick}
+                        onDelete={handleDeleteFolder}
+                        onEdit={handleEditFolder}
+                      />
+                    ))
+                  )}
             </ul>
           </ScrollArea>
           <div className="border-b border-gray-200 dark:border-gray-800 my-2" />

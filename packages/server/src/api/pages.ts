@@ -3,7 +3,7 @@ import { validator } from 'hono/validator'
 import { isNil, isNotNil, isNumberString } from '@web-archive/shared/utils'
 import type { HonoTypeUserInformation } from '~/constants/binding'
 import result from '~/utils/result'
-import { clearDeletedPage, deletePageById, getPageById, insertPage, queryDeletedPage, queryPage, restorePage, selectPageTotalCount } from '~/model/page'
+import { clearDeletedPage, deletePageById, getPageById, insertPage, queryDeletedPage, queryPage, queryRecentSavePage, restorePage, selectPageTotalCount } from '~/model/page'
 import { getFolderById, restoreFolder } from '~/model/folder'
 import { getFileFromBucket, saveFileToBucket } from '~/utils/file'
 import type { Page } from '~/sql/types'
@@ -102,6 +102,11 @@ app.post(
     return c.json(result.success({ list: pages, total }))
   },
 )
+
+app.get('/recent_save', async (c) => {
+  const pages = await queryRecentSavePage(c.env.DB)
+  return c.json(result.success(pages))
+})
 
 app.get(
   '/detail',

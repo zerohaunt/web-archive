@@ -11,7 +11,6 @@ import { useNavigate, useParams } from '~/router'
 import NotFound from '~/components/not-found'
 import LoadingWrapper from '~/components/loading-wrapper'
 import { deletePage, queryPage } from '~/data/page'
-import emitter from '~/utils/emitter'
 import CardView from '~/components/card-view'
 import EmptyWrapper from '~/components/empty-wrapper'
 import ListView from '~/components/list-view'
@@ -44,7 +43,7 @@ function FolderPage() {
       isNoMore: (d) => {
         if (!d)
           return false
-        return d.pageNumber > (d.total / PAGE_SIZE)
+        return d.list.length >= d.total || d.pageNumber > Math.ceil(d.total / PAGE_SIZE)
       },
     },
   )
@@ -57,14 +56,6 @@ function FolderPage() {
     onSuccess: (data) => {
       setPageData({ list: pagesData?.list.filter(page => page.id !== data?.id) ?? [] })
     },
-  })
-
-  emitter.on('movePage', ({
-    pageId,
-    folderId,
-  }) => {
-    if (folderId !== Number(slug))
-      setPageData({ list: pagesData?.list.filter(page => page.id !== pageId) ?? [] })
   })
 
   const navigate = useNavigate()

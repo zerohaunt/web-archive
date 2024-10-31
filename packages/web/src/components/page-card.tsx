@@ -1,5 +1,5 @@
 import type { Page } from '@web-archive/shared/types'
-import React, { useState } from 'react'
+import React, { memo, useState } from 'react'
 import { useRequest } from 'ahooks'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@web-archive/shared/components/card'
 import { Button } from '@web-archive/shared/components/button'
@@ -12,7 +12,7 @@ import { useNavigate } from '~/router'
 import { updatePageShowcase } from '~/data/page'
 import CardEditDialog from '~/components/card-edit-dialog'
 
-function PageCard({ page, onPageDelete }: { page: Page, onPageDelete?: (page: Page) => void }) {
+function Comp({ page, onPageDelete }: { page: Page, onPageDelete?: (page: Page) => void }) {
   const navigate = useNavigate()
 
   const location = useLocation()
@@ -156,5 +156,7 @@ function PageCard({ page, onPageDelete }: { page: Page, onPageDelete?: (page: Pa
     </div>
   )
 }
+
+const PageCard = memo(Comp)
 
 export default PageCard

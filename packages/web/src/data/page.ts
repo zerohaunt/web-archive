@@ -98,6 +98,12 @@ function getPageScreenshot(screenshotId: string | null) {
   }
 }
 
+function getRecentSavePage(): Promise<Page[]> {
+  return fetcher<Page[]>('/pages/recent_save', {
+    method: 'GET',
+  })
+}
+
 export {
   getPageDetail,
   deletePage,
@@ -108,4 +114,5 @@ export {
   clearDeletedPage,
   updatePageShowcase,
   getPageScreenshot,
+  getRecentSavePage,
 }

@@ -4,7 +4,7 @@ import { Input } from '@web-archive/shared/components/input'
 import { Switch } from '@web-archive/shared/components/switch'
 import { useRequest } from 'ahooks'
 import { useForm } from 'react-hook-form'
-import { useEffect } from 'react'
+import { memo, useEffect } from 'react'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@web-archive/shared/components/form'
 import { z } from 'zod'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@web-archive/shared/components/select'
@@ -22,15 +22,13 @@ interface CardEditDialogProps {
   pageId: number
 }
 
-function CardEditDialog({ open, onOpenChange, pageId }: CardEditDialogProps) {
+function Comp({ open, onOpenChange, pageId }: CardEditDialogProps) {
   const { handleSearch } = useOutletContext<{ handleSearch: () => void }>()
 
   const { data: folders, loading: foldersLoading, run: getAllFolderRun } = useRequest(getAllFolder, {
     manual: true,
   })
-  useEffect(() => {
-    getAllFolderRun()
-  }, [])
+
   const formSchema = z.object({
     title: z.string().min(1, { message: 'Title is required' }),
     pageDesc: z.string().min(1, { message: 'Description is required' }),
@@ -47,9 +45,10 @@ function CardEditDialog({ open, onOpenChange, pageId }: CardEditDialogProps) {
       folderId: 0,
     },
   })
-  const { loading } = useRequest(
+  const { loading, run: getPageDetailRun } = useRequest(
     getPageDetail,
     {
+      manual: true,
       onSuccess: (data) => {
         form.reset({
           title: data.title,
@@ -59,10 +58,15 @@ function CardEditDialog({ open, onOpenChange, pageId }: CardEditDialogProps) {
           folderId: data.folderId,
         })
       },
-      defaultParams: [pageId.toString()],
     },
   )
 
+  useEffect(() => {
+    if (open) {
+      getPageDetailRun(pageId.toString())
+      getAllFolderRun()
+    }
+  }, [open])
   const { run: updatePageRun } = useRequest(updatePage, {
     manual: true,
     onSuccess: () => {
@@ -174,5 +178,7 @@ function CardEditDialog({ open, onOpenChange, pageId }: CardEditDialogProps) {
     </Dialog>
   )
 }
+
+const CardEditDialog = memo(Comp)
 
 export default CardEditDialog
