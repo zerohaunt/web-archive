@@ -30,7 +30,7 @@ function ShowcaseFolderPage() {
       isNoMore: (d) => {
         if (!d)
           return false
-        return d.pageNumber > (d.total / PAGE_SIZE)
+        return d.list.length >= d.total || d.pageNumber > Math.ceil(d.total / PAGE_SIZE)
       },
     },
   )
