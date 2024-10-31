@@ -103,7 +103,7 @@ function Component() {
 
       <SidebarHeader>
         <div className="flex justify-center items-center">
-          <img src="/logo.svg" className="w-10 scale-x-[-1]" />
+          <img src="/static/logo.svg" className="w-10 scale-x-[-1]" />
           <h2 className="mt-2 pr-4 pl-2 text-lg font-semibold tracking-tight leading-5">
             Web
             <br />
