@@ -20,7 +20,7 @@
     "dev:web": "pnpm --filter=web dev",
     "dev:server": "pnpm --filter=server dev",
     "dev:plugin": "pnpm --filter=plugin dev",
-    "build:service": "pnpm --filter=server build && pnpm --filter=web build",
+    "build:service": "pnpm --filter=server build && pnpm --filter=web build && node scripts/build_clear.mjs",
     "build:plugin": "pnpm --filter=plugin build",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
