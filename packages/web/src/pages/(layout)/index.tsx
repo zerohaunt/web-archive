@@ -1,14 +1,20 @@
 import { useRequest } from 'ahooks'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
+import type { Page } from '@web-archive/shared/types'
 import { useMediaQuery } from '~/hooks/useMediaQuery'
 import PageDataPieCard from '~/components/page-data-pie-card'
 import R2UsageCard from '~/components/r2-usage-card'
-import { getRecentSavePage } from '~/data/page'
+import { deletePage, getRecentSavePage } from '~/data/page'
 import PageCard from '~/components/page-card'
 import { getR2Usage } from '~/data/data'
 
 function ArchiveHome() {
-  const { data: pages = [] } = useRequest(getRecentSavePage)
+  const [pages, setPages] = useState<Page[]>([])
+  useRequest(getRecentSavePage, {
+    onSuccess: (data) => {
+      setPages(data ?? [])
+    },
+  })
   const { '2xl': is2xlScreen, xl: isXlScreen, md: isMdScreen } = useMediaQuery()
 
   const columnCount = useMemo(() => {
@@ -21,13 +27,19 @@ function ArchiveHome() {
     return 1
   }, [is2xlScreen, isXlScreen, isMdScreen])
 
+  const { run: handleDeletePage } = useRequest(deletePage, {
+    manual: true,
+    onSuccess: (data) => {
+      setPages(pages.filter(page => page.id !== data?.id))
+    },
+  })
   const reorganizedPages = useMemo(() => {
     const result = Array.from({ length: columnCount }, () => [])
     return result.map((_, idx) =>
       pages
         .filter((_, index) => index % columnCount === idx)
         .map(page => (
-          <PageCard key={page.id} page={page} />
+          <PageCard key={page.id} page={page} onPageDelete={handleDeletePage} />
         )),
     )
   }, [pages, columnCount])

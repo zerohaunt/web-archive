@@ -75,7 +75,7 @@ function ArchivePage() {
   }
 
   return (
-    <>
+    <main className="h-screen flex flex-col">
       <nav className="p-2 flex justify-between items-center">
         <Button variant="ghost" size="sm" onClick={goBack}>
           <ArrowLeft className="w-5 h-5" />
@@ -108,7 +108,7 @@ function ArchivePage() {
               )
         }
       </div>
-    </>
+    </main>
   )
 }
 

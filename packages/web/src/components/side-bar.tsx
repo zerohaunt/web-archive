@@ -1,18 +1,19 @@
 import { ScrollArea } from '@web-archive/shared/components/scroll-area'
-import { Button } from '@web-archive/shared/components/button'
-import { LogOut, Plus, Settings, Trash } from 'lucide-react'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@web-archive/shared/components/collapsible'
+import { ChevronDown, FolderIcon, HomeIcon, LogOut, Plus, Settings, Trash2 } from 'lucide-react'
+import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarMenuSub } from '@web-archive/shared/components/side-bar'
 import type { Folder as FolderType } from '@web-archive/shared/types'
 import Folder from '@web-archive/shared/components/folder'
 import { Skeleton } from '@web-archive/shared/components/skeleton'
 import { useRequest } from 'ahooks'
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
-import { isNil, isNumberString } from '@web-archive/shared/utils'
+import { cn, isNil, isNumberString } from '@web-archive/shared/utils'
 import { useLocation } from 'react-router-dom'
+import { Button } from '@web-archive/shared/components/button'
 import NewFolderDialog from './new-folder-dialog'
 import EditFolderDialog from './edit-folder-dialog'
 import SettingDialog from './setting-dialog'
-import Hamburger from './hamburger'
 import { useNavigate, useParams } from '~/router'
 import emitter from '~/utils/emitter'
 import { deleteFolder, getAllFolder } from '~/data/folder'
@@ -27,7 +28,7 @@ function getNextFolderId(folders: Array<FolderType>, index: number) {
   return folders[index - 1].id
 }
 
-function SideBar() {
+function Component() {
   const navigate = useNavigate()
   const { data: folders, refresh, mutate: setFolders, loading: foldersLoading } = useRequest(getAllFolder)
 
@@ -87,11 +88,10 @@ function SideBar() {
 
   const [settingDialogOpen, setSettingDialogOpen] = useState(false)
 
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const [isFoldersCollapseOpen, setIsFoldersCollapseOpen] = useState(true)
 
   return (
-    <div className={`w-64 h-screen shadow-lg bg-white dark:bg-[#020817] dark:shadow-zinc-600 dark:shadow-sm transition-all duration-300 fixed lg:relative lg:block lg:z-auto z-50 lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-      <Hamburger className="lg:hidden block absolute top-[50%] right-[-2.2rem] cursor-pointer" onClick={() => setIsSidebarOpen(prev => !prev)} />
+    <Sidebar>
       <NewFolderDialog afterSubmit={refresh} open={newFolderDialogOpen} setOpen={setNewFolderDialogOpen} />
       <EditFolderDialog
         afterSubmit={refresh}
@@ -100,77 +100,117 @@ function SideBar() {
         editFolder={editFolder}
       />
       <SettingDialog open={settingDialogOpen} setOpen={setSettingDialogOpen} />
-      <div className="h-screen">
-        <div className="p-4 min-h-full flex flex-col">
-          <div className="flex space-x-2">
-            <Button className="flex-1 text-sm justify-center" onClick={() => setNewFolderDialogOpen(true)}>
-              <Plus className="w-5 h-5 mr-2" />
-              New Folder
-            </Button>
-          </div>
-          <ScrollArea className="h-[calc(100vh-210px)]">
-            <ul className="flex flex-col gap-2 justify-center items-center py-4">
-              {foldersLoading
-                ? (
-                  <>
-                    {Array.from({ length: 3 }).map((_, index) => (
-                      <Skeleton key={index} className="w-full h-10" />
-                    ))}
-                  </>
-                  )
-                : (
-                    folders?.map(folder => (
-                      <Folder
-                        key={folder.id}
-                        name={folder.name}
-                        id={folder.id}
-                        isOpen={openedFolder === folder.id}
-                        onClick={handleFolderClick}
-                        onDelete={handleDeleteFolder}
-                        onEdit={handleEditFolder}
-                      />
-                    ))
-                  )}
-            </ul>
-          </ScrollArea>
-          <div className="border-b border-gray-200 dark:border-gray-800 my-2" />
-          <Button
-            variant="ghost"
-            className="w-full text-sm justify-start gap-4"
-            onClick={() => {
+
+      <SidebarHeader>
+        <div className="flex justify-center items-center">
+          <img src="/logo.svg" className="w-10 scale-x-[-1]" />
+          <h2 className="mt-2 pr-4 pl-2 text-lg font-semibold tracking-tight leading-5">
+            Web
+            <br />
+            {' '}
+            Archive
+          </h2>
+        </div>
+      </SidebarHeader>
+
+      <SidebarContent className="mt-4">
+        <SidebarMenu>
+          <SidebarMenuButton className="w-full justify-between" onClick={() => navigate('/')}>
+            <div className="flex items-center">
+              <HomeIcon className="mr-2 h-4 w-4" />
+              Home
+            </div>
+          </SidebarMenuButton>
+        </SidebarMenu>
+        <SidebarMenu>
+          <Collapsible open={isFoldersCollapseOpen} onOpenChange={setIsFoldersCollapseOpen}>
+            <CollapsibleTrigger asChild>
+              <SidebarMenuButton className="w-full justify-between">
+                <div className="flex items-center">
+                  <FolderIcon className="mr-2 h-4 w-4" />
+                  Folders
+                </div>
+                <ChevronDown className={cn('h-4 w-4 transition-transform', isFoldersCollapseOpen && 'rotate-180')} />
+              </SidebarMenuButton>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <SidebarMenuSub>
+                <ScrollArea className="max-h-72">
+                  {foldersLoading
+                    ? (
+                      <>
+                        {Array.from({ length: 3 }).map((_, index) => (
+                          <Skeleton key={index} className="w-full h-10" />
+                        ))}
+                      </>
+                      )
+                    : (
+                        folders?.map(folder => (
+                          <SidebarMenuItem key={folder.id}>
+                            <SidebarMenuButton>
+                              <Folder
+                                name={folder.name}
+                                id={folder.id}
+                                isOpen={openedFolder === folder.id}
+                                onClick={handleFolderClick}
+                                onDelete={handleDeleteFolder}
+                                onEdit={handleEditFolder}
+                              />
+                            </SidebarMenuButton>
+                          </SidebarMenuItem>
+                        ))
+                      )}
+                </ScrollArea>
+                <SidebarMenuItem>
+                  <Button variant="ghost" className="w-full justify-start" onClick={() => setNewFolderDialogOpen(true)}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add Folder
+                  </Button>
+                </SidebarMenuItem>
+              </SidebarMenuSub>
+
+            </CollapsibleContent>
+          </Collapsible>
+        </SidebarMenu>
+      </SidebarContent>
+
+      <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton onClick={() => {
               setSettingDialogOpen(true)
               setOpenedFolder(null)
             }}
-          >
-            <Settings className="w-4 h-4 mr-2" />
-            Settings
-          </Button>
-          <Button
-            variant="ghost"
-            className="w-full text-sm justify-start gap-4"
-            onClick={() => {
+            >
+              <Settings className="mr-2 h-4 w-4" />
+              Settings
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton onClick={() => {
               setOpenedFolder(null)
               navigate('/trash')
             }}
-          >
-            <Trash className="w-4 h-4 mr-2" />
-            Deleted
-          </Button>
-          <Button
-            variant="ghost"
-            className="w-full text-sm justify-start gap-4"
-            onClick={() => {
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Trash
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton onClick={() => {
               setOpenedFolder(null)
               handleLogout()
             }}
-          >
-            <LogOut className="w-4 h-4 mr-2" />
-            Logout
-          </Button>
-        </div>
-      </div>
-    </div>
+            >
+              <LogOut className="mr-2 h-4 w-4" />
+              Logout
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
+
+    </Sidebar>
   )
 }
 
-export default SideBar
+export default Component
