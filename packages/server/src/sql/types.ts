@@ -1,10 +1,9 @@
 type Tag = {
   id: number
   name: string
-  pageIds: string
+  pageIdDict: string
   createdAt: Date
   updatedAt: Date
-
 }
 
 export type { Page, Folder } from '@web-archive/shared/types/model'

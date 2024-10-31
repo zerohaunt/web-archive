@@ -2,7 +2,7 @@ import { isNil, isNumberString } from '@web-archive/shared/utils'
 import { Hono } from 'hono'
 import { validator } from 'hono/validator'
 import type { HonoTypeUserInformation } from '~/constants/binding'
-import { deleteTagById, getTagById, insertTag, selectAllTags, updateTag } from '~/model/tag'
+import { bindPage, deleteTagById, insertTag, selectAllTags, unbindPage, updateTag } from '~/model/tag'
 import result from '~/utils/result'
 
 const app = new Hono<HonoTypeUserInformation>()
@@ -102,11 +102,7 @@ app.post(
   async (c) => {
     const { id, pageIds } = c.req.valid('json')
 
-    // todo use kv to avoid concurrency issue?
-    const tag = await getTagById(c.env.DB, id)
-    tag.pageIds.push(...pageIds)
-    tag.pageIds = Array.from(new Set(tag.pageIds))
-    if (await updateTag(c.env.DB, { id, pageIds: tag.pageIds })) {
+    if (await bindPage(c.env.DB, { id, pageIds })) {
       return c.json(result.success(true))
     }
 
@@ -132,9 +128,7 @@ app.post(
   async (c) => {
     const { id, pageIds } = c.req.valid('json')
 
-    const tag = await getTagById(c.env.DB, id)
-    tag.pageIds = tag.pageIds.filter(pageId => !pageIds.includes(pageId))
-    if (await updateTag(c.env.DB, { id, pageIds: tag.pageIds })) {
+    if (await unbindPage(c.env.DB, { id, pageIds })) {
       return c.json(result.success(true))
     }
 

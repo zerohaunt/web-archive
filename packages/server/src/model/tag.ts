@@ -12,9 +12,10 @@ async function selectAllTags(DB: D1Database) {
     throw sqlResult.error
   }
   const tagList = sqlResult.results.map((tag) => {
+    const pageIdDict = JSON.parse(tag.pageIdDict) as Record<string, number>
     return {
       ...tag,
-      pageIds: JSON.parse(tag.pageIds),
+      pageIds: Object.values(pageIdDict),
     }
   })
   return tagList
@@ -28,9 +29,10 @@ async function getTagById(DB: D1Database, id: number) {
     WHERE id = ?
   `
   const tag = await DB.prepare(sql).bind(id).first<Tag>()
+  const pageIdDict = JSON.parse(tag.pageIdDict) as Record<string, number>
   return {
     ...tag,
-    pageIds: JSON.parse(tag.pageIds) as Array<number>,
+    pageIds: Object.values(pageIdDict),
   }
 }
 
@@ -44,12 +46,12 @@ async function insertTag(DB: D1Database, options: { name: string, color: string 
   return sqlResult.success
 }
 
-async function updateTag(DB: D1Database, options: { id: number, name?: string, color?: string, pageIds?: Array<number> }) {
-  const { id, name, color, pageIds } = options
+async function updateTag(DB: D1Database, options: { id: number, name?: string, color?: string }) {
+  const { id, name, color } = options
   if (isNil(id)) {
     throw new Error('Tag id is required')
   }
-  if (isNil(name) && isNil(color) && isNil(pageIds)) {
+  if (isNil(name) && isNil(color)) {
     throw new Error('At least one field is required')
   }
   let sql = `
@@ -64,10 +66,6 @@ async function updateTag(DB: D1Database, options: { id: number, name?: string, c
   if (color) {
     sql += `color = ?, `
     bindParams.push(color)
-  }
-  if (pageIds) {
-    sql += `pageIds = ?, `
-    bindParams.push(JSON.stringify(pageIds))
   }
   sql = `${sql.slice(0, -2)} WHERE id = ?`
   bindParams.push(id)
@@ -84,10 +82,46 @@ async function deleteTagById(DB: D1Database, id: number) {
   return sqlResult.success
 }
 
+async function bindPage(DB: D1Database, options: { id: number, pageIds: Array<number> }) {
+  const { id, pageIds } = options
+  const mergePageDict = pageIds.reduce((acc, cur) => {
+    acc[cur.toString()] = cur
+    return acc
+  }, {})
+  const mergePageJson = JSON.stringify(mergePageDict)
+
+  const sql = `
+    UPDATE tags
+    SET pageIdDict = json_patch(pageIdDict, ?)
+    WHERE id = ?
+  `
+  const sqlResult = await DB.prepare(sql).bind(mergePageJson, id).run()
+  return sqlResult.success
+}
+
+async function unbindPage(DB: D1Database, options: { id: number, pageIds: Array<number> }) {
+  const { id, pageIds } = options
+  const mergePageDict = pageIds.reduce((acc, cur) => {
+    acc[cur.toString()] = null
+    return acc
+  }, {})
+  const mergePageJson = JSON.stringify(mergePageDict)
+
+  const sql = `
+    UPDATE tags
+    SET pageIdDict = json_patch(pageIdDict, ?)
+    WHERE id = ?
+  `
+  const sqlResult = await DB.prepare(sql).bind(mergePageJson, id).run()
+  return sqlResult.success
+}
+
 export {
   selectAllTags,
   insertTag,
   getTagById,
   updateTag,
   deleteTagById,
+  bindPage,
+  unbindPage,
 }
