@@ -1,10 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@web-archive/shared/components/card'
-import { useRequest } from 'ahooks'
+import { memo } from 'react'
 import ChartCardSkeleton from './common/chart-card-skeleton'
-import { getR2Usage } from '~/data/data'
 
-function R2UsageCard() {
-  const { data, loading } = useRequest(getR2Usage)
+const R2UsageCard = memo(({ loading, data }: { loading: boolean, data?: { count: number, size: number } }) => {
   return loading
     ? <ChartCardSkeleton />
     : (
@@ -28,6 +26,6 @@ function R2UsageCard() {
         </CardContent>
       </Card>
       )
-}
+})
 
 export default R2UsageCard
