@@ -22,8 +22,8 @@ function Layout() {
       <SidebarProvider>
         <div className="flex-1 flex">
           <SideBar />
-          <div className="flex-1 relative">
-            <Hamburger className="lg:hidden block absolute top-[50%] left-0 cursor-pointer z-50" />
+          <div className="flex-1">
+            <Hamburger className="lg:hidden block fixed top-[50%] left-0 cursor-pointer z-50" />
             <Outlet context={{ keyword, searchTrigger, handleSearch }} />
           </div>
         </div>

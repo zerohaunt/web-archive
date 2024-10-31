@@ -72,7 +72,7 @@ function Comp({ page, onPageDelete }: { page: Page, onPageDelete?: (page: Page) 
           </ScreenshotView>
           <p className="h-auto text-sm text-gray-600 dark:text-gray-400 line-clamp-3">{page.pageDesc}</p>
         </CardContent>
-        <CardFooter className="flex space-x-2 justify-end w-full backdrop-blur-sm py-4 absolute bottom-0 group-hover:opacity-100 opacity-0 transition-opacity">
+        <CardFooter className="flex space-x-2 justify-end w-full backdrop-blur-sm py-4 absolute bottom-0 group-hover:opacity-100 sm:opacity-0 transition-opacity">
           {
             !isShowcased && (
               <TooltipProvider delayDuration={200}>

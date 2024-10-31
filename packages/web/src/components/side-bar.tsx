@@ -139,25 +139,25 @@ function Component() {
                   {foldersLoading
                     ? (
                       <>
-                          {Array.from({ length: 3 }).map((_, index) => (
-                            <Skeleton key={index} className="w-full h-10" />
-                          ))}
-                        </>
+                        {Array.from({ length: 3 }).map((_, index) => (
+                          <Skeleton key={index} className="w-full h-10" />
+                        ))}
+                      </>
                       )
                     : (
                         folders?.map(folder => (
                           <SidebarMenuItem key={folder.id}>
-                              <SidebarMenuButton>
-                                <Folder
-                                  name={folder.name}
-                                  id={folder.id}
-                                  isOpen={openedFolder === folder.id}
-                                  onClick={handleFolderClick}
-                                  onDelete={handleDeleteFolder}
-                                  onEdit={handleEditFolder}
-                                />
-                              </SidebarMenuButton>
-                            </SidebarMenuItem>
+                            <SidebarMenuButton>
+                              <Folder
+                                name={folder.name}
+                                id={folder.id}
+                                isOpen={openedFolder === folder.id}
+                                onClick={handleFolderClick}
+                                onDelete={handleDeleteFolder}
+                                onEdit={handleEditFolder}
+                              />
+                            </SidebarMenuButton>
+                          </SidebarMenuItem>
                         ))
                       )}
                 </ScrollArea>
