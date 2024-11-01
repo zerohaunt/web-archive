@@ -16,6 +16,7 @@ import EmptyWrapper from '~/components/empty-wrapper'
 import ListView from '~/components/list-view'
 import AppContext from '~/store/app'
 import LoadingMore from '~/components/loading-more'
+import Header from '~/components/header'
 
 function FolderPage() {
   const { slug } = useParams('/folder/:slug')
@@ -64,12 +65,14 @@ function FolderPage() {
   }
 
   const { view } = useContext(AppContext)
+  const { setKeyword, handleSearch } = useOutletContext<{ keyword: string, setKeyword: (keyword: string) => void, handleSearch: () => void }>()
 
   if (isNil(slug))
     return <NotFound />
 
   return (
     <div className="flex flex-col flex-1">
+      <Header keyword={keyword} setKeyword={setKeyword} handleSearch={handleSearch} />
       <ScrollArea ref={scrollRef} className="p-4 overflow-auto h-[calc(100vh-58px)]">
         <LoadingWrapper loading={pagesLoading || (!pagesData)}>
           <div className="h-full">
