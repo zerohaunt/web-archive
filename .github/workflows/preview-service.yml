@@ -3,9 +3,9 @@ name: Deploy-Preview
 on:
   push:
     branches:
-      - dev
       - main
       - hotfix
+      - chunk
 
 jobs:
   deploy:
