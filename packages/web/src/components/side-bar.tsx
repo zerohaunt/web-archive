@@ -6,9 +6,15 @@ import { useLocation } from 'react-router-dom'
 import { ScrollArea } from '@web-archive/shared/components/scroll-area'
 import SettingDialog from './setting-dialog'
 import SidebarFolderMenu from './side-bar-folder-menu'
+import SidebarTagMenu from './side-bar-tag-menu'
 import { useNavigate, useParams } from '~/router'
 
-function Component() {
+interface SidebarProps {
+  selectedTag: number | null
+  setSelectedTag: (tag: number | null) => void
+}
+
+function Component({ selectedTag, setSelectedTag }: SidebarProps) {
   const navigate = useNavigate()
 
   const [openedFolder, setOpenedFolder] = useState<number | null>(null)
@@ -67,9 +73,11 @@ function Component() {
             openedFolder={openedFolder}
             setOpenedFolder={setOpenedFolder}
           />
-          <SidebarMenu>
-            {/* tag */}
-          </SidebarMenu>
+          <SidebarTagMenu
+            selectedTag={selectedTag}
+            setSelectedTag={setSelectedTag}
+          >
+          </SidebarTagMenu>
         </ScrollArea>
 
       </SidebarContent>
