@@ -2,8 +2,29 @@ import Browser from 'webextension-polyfill'
 import '~/lib/browser-polyfill.min.js'
 import '~/lib/single-file-background.js'
 import { onMessage } from 'webext-bridge/background'
+import { isNotNil } from '@web-archive/shared/utils'
 import { clearFinishedTaskList, createAndRunTask, getTaskList } from './processor'
 import { checkLoginStatus, getCacheLoginStatus, resetLoginStatus } from './login'
+
+Browser.runtime.onInstalled.addListener(async () => {
+  const tags = await Browser.tabs.query({})
+
+  // inject content script to all tabs when installed
+  tags
+    .filter(tag => isNotNil(tag.id))
+    .forEach(async (tag) => {
+      try {
+        console.log('inject content when installed', tag.title)
+        await Browser.scripting.executeScript({
+          target: { tabId: tag.id! },
+          files: ['lib/browser-polyfill.min.js', 'contentScripts/main.js'],
+        })
+      }
+      catch (e) {
+        // ignore inject error
+      }
+    })
+})
 
 async function appendAuthHeader(options?: RequestInit) {
   const { token } = await Browser.storage.local.get('token') ?? {}

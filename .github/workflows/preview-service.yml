@@ -3,10 +3,10 @@ name: Deploy-Preview
 on:
   push:
     branches:
-      - dev
       - main
       - hotfix
-      - new_card
+      - chunk
+      - search
 
 jobs:
   deploy:

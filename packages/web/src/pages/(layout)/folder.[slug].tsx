@@ -11,12 +11,12 @@ import { useNavigate, useParams } from '~/router'
 import NotFound from '~/components/not-found'
 import LoadingWrapper from '~/components/loading-wrapper'
 import { deletePage, queryPage } from '~/data/page'
-import emitter from '~/utils/emitter'
 import CardView from '~/components/card-view'
 import EmptyWrapper from '~/components/empty-wrapper'
 import ListView from '~/components/list-view'
 import AppContext from '~/store/app'
 import LoadingMore from '~/components/loading-more'
+import Header from '~/components/header'
 
 function FolderPage() {
   const { slug } = useParams('/folder/:slug')
@@ -44,7 +44,7 @@ function FolderPage() {
       isNoMore: (d) => {
         if (!d)
           return false
-        return d.pageNumber > (d.total / PAGE_SIZE)
+        return d.list.length >= d.total || d.pageNumber > Math.ceil(d.total / PAGE_SIZE)
       },
     },
   )
@@ -59,26 +59,20 @@ function FolderPage() {
     },
   })
 
-  emitter.on('movePage', ({
-    pageId,
-    folderId,
-  }) => {
-    if (folderId !== Number(slug))
-      setPageData({ list: pagesData?.list.filter(page => page.id !== pageId) ?? [] })
-  })
-
   const navigate = useNavigate()
   const handleItemClick = (page: Page) => {
     navigate(`/page/:slug`, { params: { slug: String(page.id) } })
   }
 
   const { view } = useContext(AppContext)
+  const { setKeyword, handleSearch } = useOutletContext<{ keyword: string, setKeyword: (keyword: string) => void, handleSearch: () => void }>()
 
   if (isNil(slug))
     return <NotFound />
 
   return (
     <div className="flex flex-col flex-1">
+      <Header keyword={keyword} setKeyword={setKeyword} handleSearch={handleSearch} />
       <ScrollArea ref={scrollRef} className="p-4 overflow-auto h-[calc(100vh-58px)]">
         <LoadingWrapper loading={pagesLoading || (!pagesData)}>
           <div className="h-full">

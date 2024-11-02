@@ -1,5 +1,5 @@
 import type { Page } from '@web-archive/shared/types'
-import React, { useState } from 'react'
+import React, { memo, useState } from 'react'
 import { useRequest } from 'ahooks'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@web-archive/shared/components/card'
 import { Button } from '@web-archive/shared/components/button'
@@ -12,7 +12,7 @@ import { useNavigate } from '~/router'
 import { updatePageShowcase } from '~/data/page'
 import CardEditDialog from '~/components/card-edit-dialog'
 
-function PageCard({ page, onPageDelete }: { page: Page, onPageDelete?: (page: Page) => void }) {
+function Comp({ page, onPageDelete }: { page: Page, onPageDelete?: (page: Page) => void }) {
   const navigate = useNavigate()
 
   const location = useLocation()
@@ -50,7 +50,11 @@ function PageCard({ page, onPageDelete }: { page: Page, onPageDelete?: (page: Pa
 
   return (
     <div>
-      <CardEditDialog open={openCardEditDialog} onOpenChange={setOpenCardEditDialog} pageId={page.id} />
+      {
+        !isShowcased && (
+          <CardEditDialog open={openCardEditDialog} onOpenChange={setOpenCardEditDialog} pageId={page.id} />
+        )
+      }
       <Card
         key={page.id}
         onClick={() => handleClickPageCard(page)}
@@ -68,7 +72,7 @@ function PageCard({ page, onPageDelete }: { page: Page, onPageDelete?: (page: Pa
           </ScreenshotView>
           <p className="h-auto text-sm text-gray-600 dark:text-gray-400 line-clamp-3">{page.pageDesc}</p>
         </CardContent>
-        <CardFooter className="flex space-x-2 justify-end w-full backdrop-blur-sm py-4 absolute bottom-0 group-hover:opacity-100 opacity-0 transition-opacity">
+        <CardFooter className="flex space-x-2 justify-end w-full backdrop-blur-sm py-4 absolute bottom-0 group-hover:opacity-100 sm:opacity-0 transition-opacity">
           {
             !isShowcased && (
               <TooltipProvider delayDuration={200}>
@@ -152,5 +156,7 @@ function PageCard({ page, onPageDelete }: { page: Page, onPageDelete?: (page: Pa
     </div>
   )
 }
+
+const PageCard = memo(Comp)
 
 export default PageCard

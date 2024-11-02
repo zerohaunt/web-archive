@@ -1,6 +1,7 @@
 import { Hono } from 'hono'
 import type { Bindings, HonoTypeUserInformation } from './constants/binding'
 import tokenMiddleware from './middleware/token'
+import data from './api/data'
 import showcase from '~/api/showcase'
 import pages from '~/api/pages'
 import auth from '~/api/auth'
@@ -37,6 +38,7 @@ api.route('/pages', pages)
 api.route('/auth', auth)
 api.route('/folders', folders)
 api.route('/tags', tags)
+api.route('/data', data)
 app.route('/api', api)
 
 export default app

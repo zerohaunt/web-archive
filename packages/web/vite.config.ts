@@ -24,6 +24,12 @@ export default defineConfig({
       output: {
         entryFileNames: 'index.js',
         assetFileNames: 'index.css',
+        chunkFileNames: 'assets/[name]-[hash].js',
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'radix-ui': ['@radix-ui/react-checkbox', '@radix-ui/react-collapsible', '@radix-ui/react-context-menu', '@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-label', '@radix-ui/react-scroll-area', '@radix-ui/react-select', '@radix-ui/react-separator', '@radix-ui/react-slot', '@radix-ui/react-switch', '@radix-ui/react-tooltip'],
+          'recharts': ['recharts'],
+        },
       },
     },
     outDir: '../../dist/service/src/static',

@@ -80,13 +80,13 @@ function TaskListItem({ task }: { task: SeriableSingleFileTask }) {
       <div className="font-bold cursor-pointer overflow-hidden text-ellipsis text-nowrap" onClick={openOriginalPage}>{task.title}</div>
       <div>{runningTimeText}</div>
       <div className="flex mt-0.5">
-        <TaskStatusIcon status={task.status}></TaskStatusIcon>
+        <TaskStatusIcon status={task.status} errorMessage={task.errorMessage}></TaskStatusIcon>
       </div>
     </div>
   )
 }
 
-function TaskStatusIcon({ status }: { status: 'init' | 'scraping' | 'uploading' | 'done' | 'failed' }) {
+function TaskStatusIcon({ status, errorMessage }: { status: 'init' | 'scraping' | 'uploading' | 'done' | 'failed', errorMessage?: string }) {
   if (status === 'init' || status === 'scraping' || status === 'uploading') {
     return (
       <LoaderCircle
@@ -107,10 +107,20 @@ function TaskStatusIcon({ status }: { status: 'init' | 'scraping' | 'uploading' 
 
   if (status === 'failed') {
     return (
-      <ClockAlert
-        size={14}
-        className="text-destructive"
-      />
+      <TooltipProvider delayDuration={200}>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <ClockAlert
+              size={14}
+              className="text-destructive"
+            />
+          </TooltipTrigger>
+          <TooltipContent side="top" className="max-w-60">
+            {errorMessage}
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+
     )
   }
   return (

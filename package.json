@@ -20,7 +20,7 @@
     "dev:web": "pnpm --filter=web dev",
     "dev:server": "pnpm --filter=server dev",
     "dev:plugin": "pnpm --filter=plugin dev",
-    "build:service": "pnpm --filter=server build && pnpm --filter=web build",
+    "build:service": "pnpm --filter=server build && pnpm --filter=web build && node scripts/build_clear.mjs",
     "build:plugin": "pnpm --filter=plugin build",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -29,6 +29,7 @@
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
     "@radix-ui/react-checkbox": "^1.1.2",
+    "@radix-ui/react-collapsible": "^1.1.1",
     "@radix-ui/react-context-menu": "^2.2.2",
     "@radix-ui/react-dialog": "^1.1.2",
     "@radix-ui/react-dropdown-menu": "^2.1.2",
@@ -49,6 +50,7 @@
     "react-error-boundary": "^4.0.13",
     "react-hook-form": "^7.53.1",
     "react-hot-toast": "^2.4.1",
+    "recharts": "^2.13.0",
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",
     "zod": "^3.23.8"
