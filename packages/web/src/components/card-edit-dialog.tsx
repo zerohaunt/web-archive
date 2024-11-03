@@ -12,9 +12,11 @@ import { Textarea } from '@web-archive/shared/components/textarea'
 import { Button } from '@web-archive/shared/components/button'
 import { toast } from 'react-hot-toast'
 import { useOutletContext } from 'react-router-dom'
+import AutoCompleteTagInput from '@web-archive/shared/components/auto-complete-tag-input'
 import LoadingWrapper from '~/components/loading-wrapper'
 import { getPageDetail, updatePage } from '~/data/page'
 import { getAllFolder } from '~/data/folder'
+import { getAllTag } from '~/data/tag'
 
 interface CardEditDialogProps {
   open: boolean
@@ -75,6 +77,20 @@ function Comp({ open, onOpenChange, pageId }: CardEditDialogProps) {
       onOpenChange(false)
     },
   })
+
+  const { data: tags } = useRequest(getAllTag)
+  const handleTagChange = ({
+    removeTagIds,
+    newBindTagIds,
+    createTags,
+  }: {
+    removeTagIds: number[]
+    newBindTagIds: number[]
+    createTags: string[]
+  }) => {
+    console.log(removeTagIds, newBindTagIds, createTags)
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTitle></DialogTitle>
@@ -165,6 +181,23 @@ function Comp({ open, onOpenChange, pageId }: CardEditDialogProps) {
                   </FormItem>
                 )}
               />
+              <FormField
+                name="tags"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tags</FormLabel>
+                    <FormControl className="w-full">
+                      <AutoCompleteTagInput
+                        tags={tags ?? []}
+                        onChange={handleTagChange}
+                      >
+                      </AutoCompleteTagInput>
+                    </FormControl>
+                  </FormItem>
+                )}
+              >
+
+              </FormField>
               <DialogFooter>
                 <DialogClose asChild>
                   <Button variant="outline">Cancel</Button>
