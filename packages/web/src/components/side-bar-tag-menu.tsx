@@ -1,10 +1,9 @@
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@web-archive/shared/components/collapsible'
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarMenuSub } from '@web-archive/shared/components/side-bar'
 import { cn } from '@web-archive/shared/utils'
-import { useRequest } from 'ahooks'
 import { ChevronDown, TagIcon } from 'lucide-react'
-import { useState } from 'react'
-import { getAllTag } from '~/data/tag'
+import { useContext, useState } from 'react'
+import AppContext from '~/store/app'
 
 interface SidebarTagMenuProps {
   selectedTag: number | null
@@ -12,7 +11,7 @@ interface SidebarTagMenuProps {
 }
 
 function SidebarTagMenu({ selectedTag, setSelectedTag }: SidebarTagMenuProps) {
-  const { data: tags } = useRequest(getAllTag)
+  const { tagCache: tags } = useContext(AppContext)
   const [isTagsCollapseOpen, setIsTagsCollapseOpen] = useState(false)
 
   const handleClickTag = (tagId: number) => {

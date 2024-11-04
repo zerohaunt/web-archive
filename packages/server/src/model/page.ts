@@ -179,6 +179,22 @@ async function queryRecentSavePage(DB: D1Database) {
   return result.results
 }
 
+async function updatePage(DB: D1Database, options: { id: number, folderId: number, title: string, isShowcased: boolean, pageDesc: string, pageUrl: string }) {
+  const { id, folderId, title, isShowcased, pageDesc, pageUrl } = options
+  const sql = `
+    UPDATE pages
+    SET
+      folderId = ?,
+      title = ?,
+      isShowcased = ?,
+      pageDesc = ?,
+      pageUrl = ?
+    WHERE id = ?
+  `
+  const result = await DB.prepare(sql).bind(folderId, title, isShowcased, pageDesc, pageUrl, id).run()
+  return result.success
+}
+
 export {
   selectPageTotalCount,
   queryPage,
@@ -191,4 +207,5 @@ export {
   clearDeletedPage,
   queryRecentSavePage,
   selectAllPageCount,
+  updatePage,
 }

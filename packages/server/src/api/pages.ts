@@ -3,11 +3,12 @@ import { validator } from 'hono/validator'
 import { isNil, isNotNil, isNumberString } from '@web-archive/shared/utils'
 import type { HonoTypeUserInformation } from '~/constants/binding'
 import result from '~/utils/result'
-import { clearDeletedPage, deletePageById, getPageById, insertPage, queryDeletedPage, queryPage, queryRecentSavePage, restorePage, selectPageTotalCount } from '~/model/page'
+import { clearDeletedPage, deletePageById, getPageById, insertPage, queryDeletedPage, queryPage, queryRecentSavePage, restorePage, selectPageTotalCount, updatePage } from '~/model/page'
 import { getFolderById, restoreFolder } from '~/model/folder'
 import { getFileFromBucket, saveFileToBucket } from '~/utils/file'
 import type { Page } from '~/sql/types'
 import { updateShowcase } from '~/model/showcase'
+import { updateBindPageByTagName } from '~/model/tag'
 
 const app = new Hono<HonoTypeUserInformation>()
 
@@ -178,6 +179,14 @@ app.put(
       return c.json(result.error(400, 'isShowcased is required'))
     }
 
+    if (isNotNil(value.bindTags) && !Array.isArray(value.bindTags)) {
+      return c.json(result.error(400, 'bindTags should be an array'))
+    }
+
+    if (isNotNil(value.unbindTags) && !Array.isArray(value.unbindTags)) {
+      return c.json(result.error(400, 'removeTags should be an array'))
+    }
+
     return {
       id: Number(value.id),
       folderId: Number(value.folderId),
@@ -185,22 +194,25 @@ app.put(
       isShowcased: value.isShowcased,
       pageDesc: value.pageDesc ?? '',
       pageUrl: value.pageUrl ?? '',
+      bindTags: value.bindTags as string[] ?? [],
+      unbindTags: value.unbindTags as string[] ?? [],
     }
   }),
   async (c) => {
-    const { id, folderId, title, isShowcased, pageDesc, pageUrl } = c.req.valid('json')
-    if (isNotNil(folderId)) {
-      const updateResult = await c.env.DB.prepare(
-        'UPDATE pages SET folderId = ?, title = ?, pageDesc = ?, pageUrl = ?, isShowcased = ? WHERE id = ?',
-      )
-        .bind(folderId, title, pageDesc, pageUrl, isShowcased, id)
-        .run()
-      if (!updateResult.error) {
-        return c.json(result.success(null))
-      }
-      return c.json(result.error(500, 'Failed to update page'))
-    }
-    return c.json(result.success(null))
+    const { id, folderId, title, isShowcased, pageDesc, pageUrl, bindTags, unbindTags } = c.req.valid('json')
+    if (isNil(folderId))
+      return c.json(result.success(null))
+
+    const bindTagParams = bindTags.map(tagName => ({ tagName, pageIds: id }))
+    const unbindTagParams = unbindTags.map(tagName => ({ tagName, pageIds: id }))
+    const [tagSuccess, pageSuccess] = await Promise.all([
+      updateBindPageByTagName(c.env.DB, bindTagParams, unbindTagParams),
+      updatePage(c.env.DB, { id, folderId, title, isShowcased, pageDesc, pageUrl }),
+    ])
+    if (tagSuccess && pageSuccess)
+      return c.json(result.success(null))
+
+    return c.json(result.error(500, 'Failed to update page'))
   },
 )
 

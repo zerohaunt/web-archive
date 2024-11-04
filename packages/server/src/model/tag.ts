@@ -116,6 +116,56 @@ async function unbindPage(DB: D1Database, options: { id: number, pageIds: Array<
   return sqlResult.success
 }
 
+async function updateBindPageByTagName(
+  DB: D1Database,
+  bindList: Array<{ tagName: string, pageIds: Array<number> | number }>,
+  unbindList: Array<{ tagName: string, pageIds: Array<number> | number }>,
+) {
+  const updateStmt = DB.prepare(`
+    INSERT INTO tags (name, pageIdDict) VALUES (?, ?)
+      ON CONFLICT(name) DO UPDATE SET pageIdDict = json_patch(pageIdDict, ?) WHERE name = ?
+    `)
+  const bindCommands = bindList.map(({ tagName, pageIds }) => {
+    const mergePageJson = pageIdsToBindDictString(pageIds)
+    return updateStmt.bind(tagName, mergePageJson, mergePageJson, tagName)
+  })
+
+  const unbindCommands = unbindList.map(({ tagName, pageIds }) => {
+    const mergePageJson = pageIdsToUnbindDictString(pageIds)
+    return updateStmt.bind(tagName, mergePageJson, mergePageJson, tagName)
+  })
+
+  const commands = bindCommands.concat(unbindCommands)
+  if (commands.length === 0) {
+    return true
+  }
+
+  const updateResult = await DB.batch(commands)
+  return updateResult.every(result => result.success)
+}
+
+function pageIdsToBindDictString(pageIds: Array<number> | number) {
+  if (!Array.isArray(pageIds)) {
+    pageIds = [pageIds]
+  }
+  const dict = pageIds.reduce((acc, cur) => {
+    acc[cur.toString()] = cur
+    return acc
+  }, {})
+  return JSON.stringify(dict)
+}
+
+function pageIdsToUnbindDictString(pageIds: Array<number> | number) {
+  if (!Array.isArray(pageIds)) {
+    pageIds = [pageIds]
+  }
+  const dict = pageIds.reduce((acc, cur) => {
+    acc[cur.toString()] = null
+    return acc
+  }, {})
+  return JSON.stringify(dict)
+}
+
 export {
   selectAllTags,
   insertTag,
@@ -124,4 +174,5 @@ export {
   deleteTagById,
   bindPage,
   unbindPage,
+  updateBindPageByTagName,
 }

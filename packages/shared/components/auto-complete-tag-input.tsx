@@ -8,9 +8,8 @@ interface AutoCompleteTagInputProps {
   tags: Tag[]
   selectTags?: Tag[]
   onChange?: (options: {
-    removeTagIds: number[],
-    newBindTagIds: number[],
-    createTags: string[],
+    unbindTags: string[],
+    bindTags: string[]
   }) => void
 }
 
@@ -28,9 +27,8 @@ function AutoCompleteTagInput({ tags, selectTags = [], onChange }: AutoCompleteT
     setTagList(value)
     const newTagList = typeof value === 'function' ? value(tagList) : value
     onChange?.({
-      removeTagIds: autoCompleteTags.filter(tag => !newTagList.find(newTag => newTag.id === tag.id)).map(tag => parseInt(tag.id)),
-      newBindTagIds: newTagList.filter(newTag => autoCompleteTags.find(tag => newTag.id === tag.id) && !selectTagList.find(tag => newTag.id === tag.id)).map(tag => parseInt(tag.id)),
-      createTags: newTagList.filter(newTag => !autoCompleteTags.find(tag => newTag.id === tag.id)).map(tag => tag.text)
+      unbindTags: selectTagList.filter(tag => !newTagList.find(item => tag.text === item.text)).map(tag => tag.text),
+      bindTags: newTagList.map(tag => tag.text)
     })
   };
   return (
