@@ -82,44 +82,15 @@ async function deleteTagById(DB: D1Database, id: number) {
   return sqlResult.success
 }
 
-async function bindPage(DB: D1Database, options: { id: number, pageIds: Array<number> }) {
-  const { id, pageIds } = options
-  const mergePageDict = pageIds.reduce((acc, cur) => {
-    acc[cur.toString()] = cur
-    return acc
-  }, {})
-  const mergePageJson = JSON.stringify(mergePageDict)
-
-  const sql = `
-    UPDATE tags
-    SET pageIdDict = json_patch(pageIdDict, ?)
-    WHERE id = ?
-  `
-  const sqlResult = await DB.prepare(sql).bind(mergePageJson, id).run()
-  return sqlResult.success
+interface TagBindRecord {
+  tagName: string
+  pageIds: Array<number>
 }
 
-async function unbindPage(DB: D1Database, options: { id: number, pageIds: Array<number> }) {
-  const { id, pageIds } = options
-  const mergePageDict = pageIds.reduce((acc, cur) => {
-    acc[cur.toString()] = null
-    return acc
-  }, {})
-  const mergePageJson = JSON.stringify(mergePageDict)
-
-  const sql = `
-    UPDATE tags
-    SET pageIdDict = json_patch(pageIdDict, ?)
-    WHERE id = ?
-  `
-  const sqlResult = await DB.prepare(sql).bind(mergePageJson, id).run()
-  return sqlResult.success
-}
-
-async function generateUpdateTagSql(
+function generateUpdateTagSql(
   DB: D1Database,
-  bindList: Array<{ tagName: string, pageIds: Array<number> | number }>,
-  unbindList: Array<{ tagName: string, pageIds: Array<number> | number }>,
+  bindList: Array<TagBindRecord>,
+  unbindList: Array<TagBindRecord>,
 ) {
   const updateStmt = DB.prepare(`
     INSERT INTO tags (name, pageIdDict) VALUES (?, ?)
@@ -140,24 +111,10 @@ async function generateUpdateTagSql(
 
 async function updateBindPageByTagName(
   DB: D1Database,
-  bindList: Array<{ tagName: string, pageIds: Array<number> | number }>,
-  unbindList: Array<{ tagName: string, pageIds: Array<number> | number }>,
+  bindList: Array<TagBindRecord>,
+  unbindList: Array<TagBindRecord>,
 ) {
-  const updateStmt = DB.prepare(`
-    INSERT INTO tags (name, pageIdDict) VALUES (?, ?)
-      ON CONFLICT(name) DO UPDATE SET pageIdDict = json_patch(pageIdDict, ?) WHERE name = ?
-    `)
-  const bindCommands = bindList.map(({ tagName, pageIds }) => {
-    const mergePageJson = pageIdsToBindDictString(pageIds)
-    return updateStmt.bind(tagName, mergePageJson, mergePageJson, tagName)
-  })
-
-  const unbindCommands = unbindList.map(({ tagName, pageIds }) => {
-    const mergePageJson = pageIdsToUnbindDictString(pageIds)
-    return updateStmt.bind(tagName, mergePageJson, mergePageJson, tagName)
-  })
-
-  const commands = bindCommands.concat(unbindCommands)
+  const commands = generateUpdateTagSql(DB, bindList, unbindList)
   if (commands.length === 0) {
     return true
   }
@@ -166,10 +123,7 @@ async function updateBindPageByTagName(
   return updateResult.every(result => result.success)
 }
 
-function pageIdsToBindDictString(pageIds: Array<number> | number) {
-  if (!Array.isArray(pageIds)) {
-    pageIds = [pageIds]
-  }
+function pageIdsToBindDictString(pageIds: Array<number>) {
   const dict = pageIds.reduce((acc, cur) => {
     acc[cur.toString()] = cur
     return acc
@@ -177,10 +131,7 @@ function pageIdsToBindDictString(pageIds: Array<number> | number) {
   return JSON.stringify(dict)
 }
 
-function pageIdsToUnbindDictString(pageIds: Array<number> | number) {
-  if (!Array.isArray(pageIds)) {
-    pageIds = [pageIds]
-  }
+function pageIdsToUnbindDictString(pageIds: Array<number>) {
   const dict = pageIds.reduce((acc, cur) => {
     acc[cur.toString()] = null
     return acc
@@ -194,8 +145,7 @@ export {
   getTagById,
   updateTag,
   deleteTagById,
-  bindPage,
-  unbindPage,
   updateBindPageByTagName,
   generateUpdateTagSql,
+  TagBindRecord,
 }

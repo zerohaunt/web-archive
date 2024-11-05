@@ -219,13 +219,10 @@ app.put(
     if (isNil(folderId))
       return c.json(result.success(null))
 
-    const bindTagParams = bindTags.map(tagName => ({ tagName, pageIds: id }))
-    const unbindTagParams = unbindTags.map(tagName => ({ tagName, pageIds: id }))
-    const [tagSuccess, pageSuccess] = await Promise.all([
-      updateBindPageByTagName(c.env.DB, bindTagParams, unbindTagParams),
-      updatePage(c.env.DB, { id, folderId, title, isShowcased, pageDesc, pageUrl }),
-    ])
-    if (tagSuccess && pageSuccess)
+    const bindTagParams = bindTags.map(tagName => ({ tagName, pageIds: [id] }))
+    const unbindTagParams = unbindTags.map(tagName => ({ tagName, pageIds: [id] }))
+    const updateSuccess = await updatePage(c.env.DB, { id, folderId, title, isShowcased, pageDesc, pageUrl, bindTags: bindTagParams, unbindTags: unbindTagParams })
+    if (updateSuccess)
       return c.json(result.success(null))
 
     return c.json(result.error(500, 'Failed to update page'))

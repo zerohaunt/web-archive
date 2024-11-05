@@ -1,6 +1,6 @@
 import { Badge } from '@web-archive/shared/components/badge'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@web-archive/shared/components/collapsible'
-import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarMenuSub } from '@web-archive/shared/components/side-bar'
+import { SidebarMenu, SidebarMenuButton, SidebarMenuSub } from '@web-archive/shared/components/side-bar'
 import { cn } from '@web-archive/shared/utils'
 import { ChevronDown, TagIcon } from 'lucide-react'
 import { useContext, useState } from 'react'

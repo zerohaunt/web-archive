@@ -2,7 +2,7 @@ import { isNil, isNumberString } from '@web-archive/shared/utils'
 import { Hono } from 'hono'
 import { validator } from 'hono/validator'
 import type { HonoTypeUserInformation } from '~/constants/binding'
-import { bindPage, deleteTagById, insertTag, selectAllTags, unbindPage, updateTag } from '~/model/tag'
+import { deleteTagById, insertTag, selectAllTags, updateTag } from '~/model/tag'
 import result from '~/utils/result'
 
 const app = new Hono<HonoTypeUserInformation>()
@@ -81,58 +81,6 @@ app.delete(
     }
 
     return c.json(result.error(500, 'Failed to delete tag'))
-  },
-)
-
-app.post(
-  '/bind_page',
-  validator('json', (value, c) => {
-    if (isNil(value.id) || !isNumberString(value.id)) {
-      return c.json(result.error(400, 'ID is required'))
-    }
-    if (isNil(value.pageIds) || !Array.isArray(value.pageIds)) {
-      return c.json(result.error(400, 'Page ID is required'))
-    }
-
-    return {
-      id: Number(value.id),
-      pageIds: value.pageIds as Array<number>,
-    }
-  }),
-  async (c) => {
-    const { id, pageIds } = c.req.valid('json')
-
-    if (await bindPage(c.env.DB, { id, pageIds })) {
-      return c.json(result.success(true))
-    }
-
-    return c.json(result.error(500, 'Failed to bind pages'))
-  },
-)
-
-app.post(
-  '/unbind_page',
-  validator('json', (value, c) => {
-    if (isNil(value.id) || !isNumberString(value.id)) {
-      return c.json(result.error(400, 'ID is required'))
-    }
-    if (isNil(value.pageIds) || !Array.isArray(value.pageIds)) {
-      return c.json(result.error(400, 'Page ID is required'))
-    }
-
-    return {
-      id: Number(value.id),
-      pageIds: value.pageIds as Array<number>,
-    }
-  }),
-  async (c) => {
-    const { id, pageIds } = c.req.valid('json')
-
-    if (await unbindPage(c.env.DB, { id, pageIds })) {
-      return c.json(result.success(true))
-    }
-
-    return c.json(result.error(500, 'Failed to unbind pages'))
   },
 )
 

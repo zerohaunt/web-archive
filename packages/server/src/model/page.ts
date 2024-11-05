@@ -1,4 +1,6 @@
 import { isNotNil } from '@web-archive/shared/utils'
+import type { TagBindRecord } from './tag'
+import { generateUpdateTagSql } from './tag'
 import type { Page } from '~/sql/types'
 
 async function selectPageTotalCount(DB: D1Database, options: { folderId: number, keyword?: string, tagId?: number }) {
@@ -179,8 +181,19 @@ async function queryRecentSavePage(DB: D1Database) {
   return result.results
 }
 
-async function updatePage(DB: D1Database, options: { id: number, folderId: number, title: string, isShowcased: boolean, pageDesc: string, pageUrl: string }) {
-  const { id, folderId, title, isShowcased, pageDesc, pageUrl } = options
+interface UpdatePageOptions {
+  id: number
+  folderId: number
+  title: string
+  isShowcased: boolean
+  pageDesc: string
+  pageUrl: string
+  bindTags?: Array<TagBindRecord>
+  unbindTags?: Array<TagBindRecord>
+}
+
+async function updatePage(DB: D1Database, options: UpdatePageOptions) {
+  const { id, folderId, title, isShowcased, pageDesc, pageUrl, bindTags = [], unbindTags = [] } = options
   const sql = `
     UPDATE pages
     SET
@@ -191,8 +204,10 @@ async function updatePage(DB: D1Database, options: { id: number, folderId: numbe
       pageUrl = ?
     WHERE id = ?
   `
-  const result = await DB.prepare(sql).bind(folderId, title, isShowcased, pageDesc, pageUrl, id).run()
-  return result.success
+  const updateSql = DB.prepare(sql).bind(folderId, title, isShowcased, pageDesc, pageUrl, id)
+  const updateSqlList = generateUpdateTagSql(DB, bindTags, unbindTags)
+  const result = await DB.batch([updateSql, ...updateSqlList])
+  return result.every(r => r.success)
 }
 
 export {
