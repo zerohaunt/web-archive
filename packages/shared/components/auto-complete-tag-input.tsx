@@ -42,14 +42,10 @@ function AutoCompleteTagInput({ tags, selectTags = [], onChange }: AutoCompleteT
       direction="row"
       placeholder="Add a tag"
       styleClasses={{
-        tagList: {
-          container: "mb-2"
-        },
         inlineTagsContainer: "rounded-md",
         autoComplete: {
-          popoverContent: "transform -translate-x-[7px]",
+          popoverTrigger: "w-[calc(36px-0.75rem)]",
         },
-        input: "rounded-md",
       }}
       autocompleteOptions={autoCompleteTags}
     >

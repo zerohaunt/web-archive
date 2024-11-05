@@ -191,7 +191,7 @@ function Comp({ open, onOpenChange, pageId }: CardEditDialogProps) {
                 render={() => (
                   <FormItem>
                     <FormLabel>Tags</FormLabel>
-                    <FormControl className="w-full">
+                    <FormControl>
                       <AutoCompleteTagInput
                         tags={tagCache ?? []}
                         selectTags={selectTags ?? []}
