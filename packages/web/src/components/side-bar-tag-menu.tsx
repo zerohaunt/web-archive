@@ -1,3 +1,4 @@
+import { Badge } from '@web-archive/shared/components/badge'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@web-archive/shared/components/collapsible'
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarMenuSub } from '@web-archive/shared/components/side-bar'
 import { cn } from '@web-archive/shared/utils'
@@ -40,18 +41,21 @@ function SidebarTagMenu({ selectedTag, setSelectedTag }: SidebarTagMenuProps) {
         </CollapsibleTrigger>
         <CollapsibleContent>
           <SidebarMenuSub>
-            {tags?.map(tag => (
-              <SidebarMenuItem key={tag.id}>
-                <SidebarMenuButton
+            <div className="space-y-2">
+              {tags?.map(tag => (
+                <Badge
                   onClick={() => {
                     handleClickTag(tag.id)
                   }}
-                  className={cn('w-full justify-between', selectedTag === tag.id && 'bg-secondary')}
+                  key={tag.id}
+                  className="cursor-pointer h-fit mr-2 select-none"
+                  variant={selectedTag === tag.id ? 'default' : 'secondary'}
                 >
-                  {`# ${tag.name}`}
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
+                  {`${tag.name}`}
+                </Badge>
+              ))}
+            </div>
+
           </SidebarMenuSub>
         </CollapsibleContent>
       </Collapsible>

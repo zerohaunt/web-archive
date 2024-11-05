@@ -20,7 +20,7 @@ function Comp({ page, onPageDelete }: { page: Page, onPageDelete?: (page: Page) 
   const { tagCache, refreshTagCache } = useContext(AppContext)
   const bindTags = tagCache?.filter(tag => tag.pageIds.includes(page.id)) ?? []
   const tagBadgeList = bindTags.map((tag) => {
-    return (<Badge key={tag.id} variant="outline">{tag.name}</Badge>)
+    return (<Badge key={tag.id} variant="outline" className="select-none">{tag.name}</Badge>)
   })
 
   const location = useLocation()
