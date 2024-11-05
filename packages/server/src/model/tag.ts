@@ -116,6 +116,28 @@ async function unbindPage(DB: D1Database, options: { id: number, pageIds: Array<
   return sqlResult.success
 }
 
+async function generateUpdateTagSql(
+  DB: D1Database,
+  bindList: Array<{ tagName: string, pageIds: Array<number> | number }>,
+  unbindList: Array<{ tagName: string, pageIds: Array<number> | number }>,
+) {
+  const updateStmt = DB.prepare(`
+    INSERT INTO tags (name, pageIdDict) VALUES (?, ?)
+      ON CONFLICT(name) DO UPDATE SET pageIdDict = json_patch(pageIdDict, ?) WHERE name = ?
+    `)
+  const bindCommands = bindList.map(({ tagName, pageIds }) => {
+    const mergePageJson = pageIdsToBindDictString(pageIds)
+    return updateStmt.bind(tagName, mergePageJson, mergePageJson, tagName)
+  })
+
+  const unbindCommands = unbindList.map(({ tagName, pageIds }) => {
+    const mergePageJson = pageIdsToUnbindDictString(pageIds)
+    return updateStmt.bind(tagName, mergePageJson, mergePageJson, tagName)
+  })
+
+  return bindCommands.concat(unbindCommands)
+}
+
 async function updateBindPageByTagName(
   DB: D1Database,
   bindList: Array<{ tagName: string, pageIds: Array<number> | number }>,
@@ -175,4 +197,5 @@ export {
   bindPage,
   unbindPage,
   updateBindPageByTagName,
+  generateUpdateTagSql,
 }

@@ -160,7 +160,7 @@ async function insertPage(DB: D1Database, pageOptions: InsertPageOptions) {
     )
     .bind(title, pageDesc, pageUrl, contentUrl, folderId, screenshotId)
     .run()
-  return insertResult.success
+  return insertResult.meta.last_row_id
 }
 
 async function clearDeletedPage(DB: D1Database) {

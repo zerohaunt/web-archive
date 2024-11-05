@@ -31,6 +31,19 @@ app.post(
       return c.json(result.error(400, 'FolderId id should be a number'))
     }
 
+    if (isNotNil(value.bindTags)) {
+      if (typeof value.bindTags !== 'string')
+        return c.json(result.error(400, 'bindTags should be a string array'))
+      try {
+        const bindTags = JSON.parse(value.bindTags)
+        if (!Array.isArray(bindTags))
+          return c.json(result.error(400, 'bindTags should be a string array'))
+      }
+      catch (e) {
+        return c.json(result.error(400, 'bindTags should be a string array'))
+      }
+    }
+
     return {
       title: value.title,
       pageDesc: value.pageDesc as string,
@@ -38,10 +51,11 @@ app.post(
       pageFile: value.pageFile,
       folderId: Number(value.folderId),
       screenshot: value.screenshot,
+      bindTags: JSON.parse(value.bindTags ?? '[]'),
     }
   }),
   async (c) => {
-    const { title, pageDesc = '', pageUrl, pageFile, folderId, screenshot } = c.req.valid('form')
+    const { title, pageDesc = '', pageUrl, pageFile, folderId, screenshot, bindTags } = c.req.valid('form')
 
     // todo check folder exists?
 
@@ -53,7 +67,7 @@ app.post(
     if (isNil(contentUrl)) {
       return c.json({ status: 'error', message: 'Failed to upload file' })
     }
-    const insertPageResult = await insertPage(c.env.DB, {
+    const insertId = await insertPage(c.env.DB, {
       title,
       pageDesc,
       pageUrl,
@@ -61,8 +75,10 @@ app.post(
       folderId,
       screenshotId,
     })
-    if (insertPageResult) {
-      return c.json(result.success(null))
+    if (isNotNil(insertId)) {
+      const updateTagResult = await updateBindPageByTagName(c.env.DB, bindTags.map(tagName => ({ tagName, pageIds: insertId })), [])
+      if (updateTagResult)
+        return c.json(result.success(null))
     }
     return c.json(result.error(500, 'Failed to insert page'))
   },

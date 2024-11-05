@@ -39,6 +39,7 @@ function AutoCompleteTagInput({ tags, selectTags = [], onChange }: AutoCompleteT
       setTags={setTags}
       enableAutocomplete={true}
       inlineTags={true}
+      restrictTagsToAutocompleteOptions={false}
       direction="row"
       placeholder="Add a tag"
       styleClasses={{
@@ -46,6 +47,7 @@ function AutoCompleteTagInput({ tags, selectTags = [], onChange }: AutoCompleteT
         autoComplete: {
           popoverTrigger: "w-[calc(36px-0.75rem)]",
         },
+        input: "px-0"
       }}
       autocompleteOptions={autoCompleteTags}
     >
