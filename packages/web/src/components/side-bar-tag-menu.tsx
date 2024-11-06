@@ -48,7 +48,7 @@ function SidebarTagMenu({ selectedTag, setSelectedTag }: SidebarTagMenuProps) {
                     handleClickTag(tag.id)
                   }}
                   key={tag.id}
-                  className="cursor-pointer h-fit mr-2 select-none"
+                  className="cursor-pointer h-fit mr-[3px] select-none"
                   variant={selectedTag === tag.id ? 'default' : 'secondary'}
                 >
                   {`${tag.name}`}
