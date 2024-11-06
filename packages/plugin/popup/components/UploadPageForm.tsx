@@ -165,7 +165,7 @@ function UploadPageForm({ setActivePage }: UploadPageFormProps) {
   }
 
   return (
-    <div className="w-64 p-4 space-y-4 flex flex-col">
+    <div className="w-80 p-4 space-y-4 flex flex-col">
       <div className="flex flex-col space-y-2">
         <Label
           htmlFor="title"
@@ -198,6 +198,20 @@ function UploadPageForm({ setActivePage }: UploadPageFormProps) {
       </div>
 
       <div className="flex flex-col space-y-2">
+        <Label>Tags</Label>
+        <AutoCompleteTagInput
+          tags={tagList ?? []}
+          onChange={({ bindTags }) => {
+            setUploadPageData(prevData => ({
+              ...prevData,
+              bindTags,
+            }))
+          }}
+        >
+        </AutoCompleteTagInput>
+      </div>
+
+      <div className="flex flex-col space-y-2">
         <Label
           htmlFor="folderId"
         >
@@ -219,20 +233,6 @@ function UploadPageForm({ setActivePage }: UploadPageFormProps) {
             ))}
           </SelectContent>
         </Select>
-      </div>
-
-      <div className="flex flex-col space-y-2">
-        <Label>Tags</Label>
-        <AutoCompleteTagInput
-          tags={tagList ?? []}
-          onChange={({ bindTags }) => {
-            setUploadPageData(prevData => ({
-              ...prevData,
-              bindTags,
-            }))
-          }}
-        >
-        </AutoCompleteTagInput>
       </div>
 
       <div className="flex justify-between">
