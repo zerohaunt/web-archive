@@ -51,7 +51,7 @@ app.post(
       pageFile: value.pageFile,
       folderId: Number(value.folderId),
       screenshot: value.screenshot,
-      bindTags: JSON.parse(value.bindTags ?? '[]'),
+      bindTags: JSON.parse(value.bindTags ?? '[]') as string[],
     }
   }),
   async (c) => {
@@ -76,7 +76,7 @@ app.post(
       screenshotId,
     })
     if (isNotNil(insertId)) {
-      const updateTagResult = await updateBindPageByTagName(c.env.DB, bindTags.map(tagName => ({ tagName, pageIds: insertId })), [])
+      const updateTagResult = await updateBindPageByTagName(c.env.DB, bindTags.map(tagName => ({ tagName, pageIds: [insertId] })), [])
       if (updateTagResult)
         return c.json(result.success(null))
     }
