@@ -7,6 +7,22 @@ function getAllTag(): Promise<Tag[]> {
   })
 }
 
+function deleteTag(tagId: number): Promise<void> {
+  return fetcher<void>(`/tags/delete`, {
+    method: 'DELETE',
+    query: { id: tagId.toString() },
+  })
+}
+
+function updateTag(body: { id: number, name: string }): Promise<void> {
+  return fetcher<void>(`/tags/update`, {
+    method: 'POST',
+    body,
+  })
+}
+
 export {
   getAllTag,
+  deleteTag,
+  updateTag,
 }
