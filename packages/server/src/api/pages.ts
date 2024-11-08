@@ -286,7 +286,7 @@ app.post(
 app.delete(
   '/clear_deleted',
   async (c) => {
-    if (await clearDeletedPage(c.env.DB)) {
+    if (await clearDeletedPage(c.env.DB, c.env.BUCKET)) {
       return c.json(result.success(null))
     }
   },

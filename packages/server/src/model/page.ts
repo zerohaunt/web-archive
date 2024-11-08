@@ -2,6 +2,7 @@ import { isNotNil } from '@web-archive/shared/utils'
 import type { TagBindRecord } from './tag'
 import { generateUpdateTagSql } from './tag'
 import type { Page } from '~/sql/types'
+import { removeBucketFile } from '~/utils/file'
 
 async function selectPageTotalCount(DB: D1Database, options: { folderId: number, keyword?: string, tagId?: number }) {
   const { folderId, keyword, tagId } = options
@@ -165,7 +166,20 @@ async function insertPage(DB: D1Database, pageOptions: InsertPageOptions) {
   return insertResult.meta.last_row_id
 }
 
-async function clearDeletedPage(DB: D1Database) {
+async function clearDeletedPage(DB: D1Database, BUCKET: R2Bucket) {
+  const pageListSql = `
+    SELECT * FROM pages WHERE isDeleted = 1
+  `
+  const deletePageResult = await DB.prepare(pageListSql).all<Page>()
+  if (deletePageResult.error) {
+    return false
+  }
+  const deleteBucketKeys = deletePageResult.results
+    .map(page => [page.screenshotId, page.contentUrl])
+    .flat()
+    .filter(isNotNil)
+  await removeBucketFile(BUCKET, deleteBucketKeys)
+
   const sql = `
     DELETE FROM pages WHERE isDeleted = 1
   `
