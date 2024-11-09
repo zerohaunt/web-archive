@@ -80,8 +80,8 @@ function ArchivePage() {
   const { readMode, setReadMode } = useContext(AppContext)
 
   return (
-    <main className="h-screen flex flex-col">
-      <nav className="p-2 flex justify-between items-center">
+    <main className="h-screen w-screen lg:w-full flex flex-col">
+      <nav className="p-2 w-full flex justify-between items-center">
         <Button variant="ghost" size="sm" onClick={goBack}>
           <ArrowLeft className="w-5 h-5" />
         </Button>
@@ -102,7 +102,7 @@ function ArchivePage() {
           </Button>
         </div>
       </nav>
-      <div className="flex-1 p-4">
+      <div className="flex-1 p-4 w-full">
         <LoadingWrapper loading={pageLoading}>
           {readMode
             ? <ReadabilityPageContent pageHtml={pageContentUrl || ''} />
