@@ -91,7 +91,7 @@ function ArchivePage() {
             size="sm"
             onClick={() => setReadMode(!readMode)}
           >
-            {readMode ? 'open Read mode' : 'open Iframe mode'}
+            {readMode ? 'open Iframe mode' : 'open Read mode'}
           </Button>
           <Button
             variant="destructive"

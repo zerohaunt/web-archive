@@ -19,7 +19,7 @@ function ReadabilityPageContent({ pageHtml }: ReadabilityPageContentProps) {
   }, [article?.content])
 
   return (
-    <main>
+    <main className="flex flex-col gap-4 items-center">
       <h1 className="text-2xl font-bold">{article?.title}</h1>
       <h3 className="text-sm text-muted-foreground">{article?.excerpt}</h3>
       <div className="prose dark:prose-invert" ref={articleContainerRef}></div>
