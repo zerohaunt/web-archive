@@ -4,13 +4,19 @@ import { generateUpdateTagSql } from './tag'
 import type { Page } from '~/sql/types'
 import { removeBucketFile } from '~/utils/file'
 
-async function selectPageTotalCount(DB: D1Database, options: { folderId: number, keyword?: string, tagId?: number }) {
+async function selectPageTotalCount(DB: D1Database, options: { folderId?: number, keyword?: string, tagId?: number }) {
   const { folderId, keyword, tagId } = options
   let sql = `
     SELECT COUNT(*) as count FROM pages
-    WHERE folderId = ? AND isDeleted = 0
+    WHERE isDeleted = 0
   `
-  const bindParams: (number | string)[] = [folderId]
+  const bindParams: (number | string)[] = []
+
+  if (isNotNil(folderId)) {
+    sql += ` AND folderId = ?`
+    bindParams.push(folderId)
+  }
+
   if (keyword) {
     sql += ` AND title LIKE ?`
     bindParams.push(`${keyword}%`)
@@ -34,7 +40,7 @@ async function selectAllPageCount(DB: D1Database) {
   return result.count
 }
 
-async function queryPage(DB: D1Database, options: { folderId: number, pageNumber?: number, pageSize?: number, keyword?: string, tagId?: number }) {
+async function queryPage(DB: D1Database, options: { folderId?: number, pageNumber?: number, pageSize?: number, keyword?: string, tagId?: number }) {
   const { folderId, pageNumber, pageSize, keyword, tagId } = options
   let sql = `
     SELECT
@@ -49,9 +55,15 @@ async function queryPage(DB: D1Database, options: { folderId: number, pageNumber
       updatedAt,
       isShowcased
     FROM pages
-    WHERE folderId = ? AND isDeleted = 0
+    WHERE isDeleted = 0
   `
-  const bindParams: (number | string)[] = [folderId]
+  const bindParams: (number | string)[] = []
+
+  if (isNotNil(folderId)) {
+    console.log('folderId', folderId)
+    sql += ` AND folderId = ?`
+    bindParams.push(folderId)
+  }
 
   if (keyword) {
     sql += ` AND title LIKE ?`
