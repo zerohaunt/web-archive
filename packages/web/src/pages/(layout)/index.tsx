@@ -1,10 +1,10 @@
-import { useInfiniteScroll, useRequest } from 'ahooks'
+import { useInfiniteScroll, useRequest, useWhyDidYouUpdate } from 'ahooks'
 import type { Ref } from '@web-archive/shared/components/scroll-area'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { Page } from '@web-archive/shared/types'
 import { ScrollArea } from '@web-archive/shared/components/scroll-area'
 import { useOutletContext } from 'react-router-dom'
-import { isNotNil } from '@web-archive/shared/utils'
+import { isNil, isNotNil } from '@web-archive/shared/utils'
 import { useMediaQuery } from '~/hooks/useMediaQuery'
 import PageDataPieCard from '~/components/page-data-pie-card'
 import R2UsageCard from '~/components/r2-usage-card'
@@ -14,6 +14,7 @@ import { getR2Usage } from '~/data/data'
 import Header from '~/components/header'
 import LoadingWrapper from '~/components/loading-wrapper'
 import CardView from '~/components/card-view'
+import LoadingMore from '~/components/loading-more'
 
 function RecentSavePageView() {
   const { data: r2Data, loading: r2Loading } = useRequest(getR2Usage)
@@ -101,6 +102,8 @@ function SearchiPageView() {
     reload()
   }, [searchTrigger])
 
+  useWhyDidYouUpdate('SearchiPageView', { pagesData, pagesLoading, loadingMore, keyword, selectedTag })
+
   const { run: handleDeletePage } = useRequest(deletePage, {
     manual: true,
     onSuccess: (data) => {
@@ -110,7 +113,10 @@ function SearchiPageView() {
   return (
     <ScrollArea ref={scrollRef} className="p-4 overflow-auto  h-[calc(100vh-58px)]">
       <LoadingWrapper loading={pagesLoading || (!pagesData)}>
-        <CardView pages={pagesData?.list} onPageDelete={handleDeletePage} />
+        <div className="h-full">
+          <CardView pages={pagesData?.list} onPageDelete={handleDeletePage} />
+          {loadingMore && <LoadingMore />}
+        </div>
       </LoadingWrapper>
     </ScrollArea>
   )
@@ -118,10 +124,22 @@ function SearchiPageView() {
 
 function ArchiveHome() {
   const { keyword, selectedTag, setKeyword, handleSearch } = useOutletContext<{ keyword: string, searchTrigger: boolean, selectedTag: number | null, setKeyword: (keyword: string) => void, handleSearch: () => void }>()
-  const showSearchView = useMemo(() => keyword || isNotNil(selectedTag), [keyword, selectedTag])
+  const [showSearchView, setShowSearchView] = useState(false)
+  const handleStartSearch = () => {
+    if (isNil(keyword) || keyword === '') {
+      setShowSearchView(false)
+    }
+    else {
+      setShowSearchView(true)
+      handleSearch()
+    }
+  }
+  useEffect(() => {
+    setShowSearchView(isNotNil(selectedTag))
+  }, [selectedTag])
   return (
     <div className="flex flex-col flex-1">
-      <Header keyword={keyword} setKeyword={setKeyword} handleSearch={handleSearch}></Header>
+      <Header keyword={keyword} setKeyword={setKeyword} handleSearch={handleStartSearch}></Header>
       {showSearchView
         ? <SearchiPageView></SearchiPageView>
         : <RecentSavePageView></RecentSavePageView>}
