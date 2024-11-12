@@ -30,6 +30,10 @@ app.post(
       return c.json(result.error(400, 'FolderId id should be a number'))
     }
 
+    if (!value.isShowcased || !isNumberString(value.isShowcased)) {
+      return c.json(result.error(400, 'isShowcased is required'))
+    }
+
     if (isNotNil(value.bindTags)) {
       if (typeof value.bindTags !== 'string')
         return c.json(result.error(400, 'bindTags should be a string array'))
@@ -51,10 +55,11 @@ app.post(
       folderId: Number(value.folderId),
       screenshot: value.screenshot,
       bindTags: JSON.parse(value.bindTags ?? '[]') as string[],
+      isShowcased: Boolean(Number(value.isShowcased)),
     }
   }),
   async (c) => {
-    const { title, pageDesc = '', pageUrl, pageFile, folderId, screenshot, bindTags } = c.req.valid('form')
+    const { title, pageDesc = '', pageUrl, pageFile, folderId, screenshot, bindTags, isShowcased } = c.req.valid('form')
 
     // todo check folder exists?
 
@@ -73,6 +78,7 @@ app.post(
       contentUrl,
       folderId,
       screenshotId,
+      isShowcased,
     })
     if (isNotNil(insertId)) {
       const updateTagResult = await updateBindPageByTagName(c.env.DB, bindTags.map(tagName => ({ tagName, pageIds: [insertId] })), [])

@@ -20,6 +20,7 @@ declare module 'webext-bridge' {
         folderId: string
         screenshot?: string
         bindTags: string[]
+        isShowcased: boolean
       }
     }, {}>
     'get-page-task-list': ProtocolWithReturn<{}, { taskList: Array<SeriableSingleFileTask> }>

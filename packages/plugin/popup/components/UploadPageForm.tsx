@@ -12,6 +12,7 @@ import { isNil, isNotNil } from '@web-archive/shared/utils'
 import toast from 'react-hot-toast'
 import AutoCompleteTagInput from '@web-archive/shared/components/auto-complete-tag-input'
 import { PlusIcon } from 'lucide-react'
+import { Switch } from '@web-archive/shared/components/switch'
 import NewFolderDialog from './NewFolderDialog'
 import { getSingleFileSetting } from '~/popup/utils/singleFile'
 import { takeScreenshot } from '~/popup/utils/screenshot'
@@ -67,6 +68,7 @@ function UploadPageForm({ setActivePage }: UploadPageFormProps) {
     folderId: lastChooseFolderId,
     screenshot: undefined as undefined | string,
     bindTags: [] as string[],
+    isShowcased: false,
   })
 
   const { data: folderList, refresh: refreshFolderList, mutate: setFolderList } = useRequest(getAllFolders, {
@@ -153,6 +155,7 @@ function UploadPageForm({ setActivePage }: UploadPageFormProps) {
         folderId: uploadPageData.folderId,
         screenshot: uploadPageData.screenshot,
         bindTags: uploadPageData.bindTags,
+        isShowcased: uploadPageData.isShowcased,
       },
     })
     toast.success('Add save page task success')
@@ -218,6 +221,22 @@ function UploadPageForm({ setActivePage }: UploadPageFormProps) {
           onChange={handleChange}
         >
         </Textarea>
+      </div>
+
+      <div className="flex flex-col space-y-2">
+        <Label
+          htmlFor="showcased"
+        >
+          Showcased
+        </Label>
+        <Switch
+          checked={uploadPageData.isShowcased}
+          onCheckedChange={value => setUploadPageData(prevData => ({
+            ...prevData,
+            isShowcased: value,
+          }))}
+        >
+        </Switch>
       </div>
 
       <div className="flex flex-col space-y-2">
