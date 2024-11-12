@@ -11,6 +11,8 @@ import { useRequest } from 'ahooks'
 import { isNil, isNotNil } from '@web-archive/shared/utils'
 import toast from 'react-hot-toast'
 import AutoCompleteTagInput from '@web-archive/shared/components/auto-complete-tag-input'
+import { PlusIcon } from 'lucide-react'
+import NewFolderDialog from './NewFolderDialog'
 import { getSingleFileSetting } from '~/popup/utils/singleFile'
 import { takeScreenshot } from '~/popup/utils/screenshot'
 import { getCurrentTab } from '~/popup/utils/tab'
@@ -47,6 +49,7 @@ async function scrapePageData() {
 
 async function getAllFolders() {
   const { folders } = await sendMessage('get-all-folders', {})
+  await new Promise(resolve => setTimeout(resolve, 2000))
   return folders
 }
 
@@ -66,7 +69,7 @@ function UploadPageForm({ setActivePage }: UploadPageFormProps) {
     bindTags: [] as string[],
   })
 
-  const { data: folderList } = useRequest(getAllFolders, {
+  const { data: folderList, refresh: refreshFolderList, mutate: setFolderList } = useRequest(getAllFolders, {
     cacheKey: 'folderList',
     setCache: (data) => {
       localStorage.setItem('folderList', JSON.stringify(data))
@@ -156,6 +159,20 @@ function UploadPageForm({ setActivePage }: UploadPageFormProps) {
     setActivePage('home')
   }
 
+  const [newFolderDialogVisible, setNewFolderDialogVisible] = useState(false)
+  function handleNewFolderAdded(folder: { id: number, name: string }) {
+    setFolderList(prevList => [
+      ...(prevList ?? []),
+      folder,
+    ])
+    setUploadPageData(prevData => ({
+      ...prevData,
+      folderId: folder.id.toString(),
+    }))
+    localStorage.setItem('lastChooseFolderId', folder.id.toString())
+    refreshFolderList()
+  }
+
   if (isInitPageData) {
     return (
       <LoadingPage
@@ -166,6 +183,12 @@ function UploadPageForm({ setActivePage }: UploadPageFormProps) {
 
   return (
     <div className="w-80 p-4 space-y-4 flex flex-col">
+      <NewFolderDialog
+        open={newFolderDialogVisible}
+        afterSubmit={handleNewFolderAdded}
+        setOpen={setNewFolderDialogVisible}
+      >
+      </NewFolderDialog>
       <div className="flex flex-col space-y-2">
         <Label
           htmlFor="title"
@@ -218,22 +241,32 @@ function UploadPageForm({ setActivePage }: UploadPageFormProps) {
         >
           Folder
         </Label>
-        <Select
-          name="folderId"
-          value={uploadPageData.folderId}
-          onValueChange={handleFolderSelect}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="select folder"></SelectValue>
-          </SelectTrigger>
-          <SelectContent className="max-h-48">
-            {folderList && folderList.map(folder => (
-              <SelectItem key={folder.id} value={folder.id.toString()}>
-                {folder.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="flex space-x-2">
+          <Select
+            name="folderId"
+            value={uploadPageData.folderId}
+            onValueChange={handleFolderSelect}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="select folder"></SelectValue>
+            </SelectTrigger>
+            <SelectContent className="max-h-48">
+              {folderList && folderList.map(folder => (
+                <SelectItem key={folder.id} value={folder.id.toString()}>
+                  {folder.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button
+            variant="secondary"
+            className="w-12 h-10"
+            size="icon"
+            onClick={() => setNewFolderDialogVisible(true)}
+          >
+            <PlusIcon size={18}></PlusIcon>
+          </Button>
+        </div>
       </div>
 
       <div className="flex justify-between">

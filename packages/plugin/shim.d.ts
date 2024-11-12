@@ -32,6 +32,7 @@ declare module 'webext-bridge' {
     'get-token': ProtocolWithReturn<{}, { token: string }>
     'set-token': ProtocolWithReturn<{ token: string }, { success: boolean }>
     'get-all-folders': ProtocolWithReturn<{}, { folders: Array<{ id: number, name: string }> }>
+    'create-folder': ProtocolWithReturn<{ name: string }, { name: string, id: number } | undefined>
     'get-all-tags': ProtocolWithReturn<{}, { tags: Array<Tag> }>
     'scrape-page-progress': ProtocolWithReturn<{ stage: LoadStage }, {}>
     'scrape-page-progress-to-popup': ProtocolWithReturn<{ stage: LoadStage }, {}>
