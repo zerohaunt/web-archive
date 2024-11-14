@@ -1,5 +1,4 @@
 import { useEventListener, useRequest } from 'ahooks'
-import { useEffect } from 'react'
 import toast from 'react-hot-toast'
 import { getShouldShowRecent, setShouldShowRecent } from '~/data/config'
 
