@@ -170,3 +170,13 @@ onMessage('scrape-available', async ({ data: { tabId } }) => {
     return { available: false }
   }
 })
+
+onMessage('get-ai-tag-config', async () => {
+  const aiTagConfig = await request('/config/ai_tag', {
+    method: 'GET',
+  })
+  console.log(aiTagConfig)
+  return {
+    aiTagConfig,
+  }
+})
