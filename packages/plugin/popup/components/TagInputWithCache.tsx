@@ -1,9 +1,9 @@
-import { error } from 'node:console'
 import { useRef } from 'react'
 import type { AutoCompleteTagInputRef } from '@web-archive/shared/components/auto-complete-tag-input'
 import AutoCompleteTagInput from '@web-archive/shared/components/auto-complete-tag-input'
 import { Button } from '@web-archive/shared/components/button'
-import { generateTag } from '@web-archive/shared/utils'
+import type { GenerateTagProps } from '@web-archive/shared/utils'
+import { generateTagByOpenAI } from '@web-archive/shared/utils'
 import { useRequest } from 'ahooks'
 import { AlertCircleIcon, Loader2Icon, SparklesIcon } from 'lucide-react'
 import { sendMessage } from 'webext-bridge/popup'
@@ -17,6 +17,14 @@ async function getAllTags() {
 async function getAITagConfig() {
   const { aiTagConfig } = await sendMessage('get-ai-tag-config', {})
   return aiTagConfig
+}
+
+async function doGenerateTag(props: GenerateTagProps) {
+  if (props.type === 'cloudflare') {
+    const { tags } = await sendMessage('generate-tag', props)
+    return tags
+  }
+  return await generateTagByOpenAI(props)
 }
 
 interface TagInputWithCacheProps {
@@ -50,7 +58,7 @@ function TagInputWithCache({ onValueChange, title, description }: TagInputWithCa
   })
 
   const { run: generateTagRun, loading: generateTagRunning, error: generateTagError } = useRequest(
-    generateTag,
+    doGenerateTag,
     {
       manual: true,
       onSuccess: (data) => {

@@ -1,21 +1,30 @@
 import { Button } from '@web-archive/shared/components/button'
 import { AlertCircle, Check, Loader2 } from 'lucide-react'
 import { useState } from 'react'
-import { generateTag } from '@web-archive/shared/utils'
+import type { GenerateTagProps } from '@web-archive/shared/utils'
+import { generateTagByOpenAI } from '@web-archive/shared/utils'
 import { useRequest } from 'ahooks'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@web-archive/shared/components/tooltip'
 import type { AITagConfig } from '@web-archive/shared/types'
+import { generateTag } from '~/data/tag'
 
 interface Props {
   config: AITagConfig
   onValidate: () => Promise<boolean>
 }
 
+async function generateTagByConfig(config: GenerateTagProps) {
+  if (config.type === 'openai') {
+    return await generateTagByOpenAI(config)
+  }
+  return await generateTag(config)
+}
+
 function AITagTestConnectionButton({ config, onValidate }: Props) {
   const [status, setStatus] = useState<'untested' | 'success' | 'error'>('untested')
   const [error, setError] = useState<string | null>()
 
-  const { runAsync: testConnection, loading } = useRequest(generateTag, {
+  const { runAsync: testConnection, loading } = useRequest(generateTagByConfig, {
     manual: true,
   })
 

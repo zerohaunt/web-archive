@@ -24,33 +24,43 @@ interface GenerateTagResponse {
   }
 }
 
-function generateChatCompletion(tagLanguage: string, preferredTags: string[]): string {
-  switch (tagLanguage) {
-    case 'zh':
-      return `你会给输入的内容做出哪些tag? 请遵循以下规则:
-              1. 大部分tag使用中文
-              2. 保持常用的英文专业术语和缩写原样不变(如: AI, CSS, React, Vue等)
-              3. 不要将品牌名称翻译为中文(如: Microsoft, Google等)
-              4. 请优先使用这些标签，并根据内容补充其他相关标签: [${preferredTags.join(', ')}]
-              5. 返回格式必须是: {"tags": ["tag1", "tag2", ...]} 
-              6. 不要返回其他任何解释性文字
-              7. 请注意，标签应该是与内容相关的关键词，而不是对内容的解释
-              `
-    case 'en':
-    default:
-      return `What tags would you give to the input content? Please follow these rules:
-              1. Use English for most tags
-              2. Keep common technical terms and abbreviations as-is
-              3. Keep brand names in their original form
-              4. Please prioritize these tags and add other relevant tags based on the content: [${preferredTags.join(', ')}]
-              5. Return format must be: {"tags": ["tag1", "tag2", ...]}
-              6. Do not return any explanatory text
-              7. Note that tags should be keywords related to the content, not explanations of the content
-              `
-  }
+export function buildGenerateTagMessage(props: {
+  title: string
+  pageDesc: string
+  tagLanguage: string
+  preferredTags: string[]
+}) {
+  return [
+    {
+      role: 'system' as const,
+      content: generateChatCompletion(props.tagLanguage, props.preferredTags),
+    },
+    {
+      role: 'user' as const,
+      content: JSON.stringify({
+        title: props.title,
+        pageDesc: props.pageDesc,
+      }),
+    },
+  ]
 }
 
-export async function generateTag(props: GenerateTagProps): Promise<Array<string>> {
+function generateChatCompletion(tagLanguage: string, preferredTags: string[]): string {
+  return `What tags would you give to the input content? Please follow these rules:
+    1. Use ${tagLanguage === 'zh' ? 'chinese' : 'english'} for most tags
+    2. Keep common technical terms and abbreviations as-is
+    3. Keep brand names in their original form
+    4. Note that tags should be keywords related to the content, not explanations of the content
+    5. Return format must be: {"tags": ["tag1", "tag2", ...]}
+    6. Do not return any explanatory text
+    7. Please prioritize these tags and add other relevant tags based on the content: [${preferredTags.join(', ')}]
+  `
+}
+
+export async function generateTagByOpenAI(props: GenerateTagProps): Promise<Array<string>> {
+  if (props.type !== 'openai') {
+    throw new Error('Invalid AI tag config')
+  }
   const res = await fetch(props.apiUrl, {
     method: 'POST',
     headers: {
@@ -58,19 +68,7 @@ export async function generateTag(props: GenerateTagProps): Promise<Array<string
       'Authorization': `Bearer ${props.apiKey}`,
     },
     body: JSON.stringify({
-      messages: [
-        {
-          role: 'system',
-          content: generateChatCompletion(props.tagLanguage, props.preferredTags),
-        },
-        {
-          role: 'user',
-          content: JSON.stringify({
-            title: props.title,
-            pageDesc: props.pageDesc,
-          }),
-        },
-      ],
+      messages: buildGenerateTagMessage(props),
       model: props.model,
     }),
   })

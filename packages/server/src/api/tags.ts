@@ -1,4 +1,4 @@
-import { isNil, isNumberString } from '@web-archive/shared/utils'
+import { buildGenerateTagMessage, isNil, isNumberString } from '@web-archive/shared/utils'
 import { Hono } from 'hono'
 import { validator } from 'hono/validator'
 import type { HonoTypeUserInformation } from '~/constants/binding'
@@ -81,6 +81,47 @@ app.delete(
     }
 
     return c.json(result.error(500, 'Failed to delete tag'))
+  },
+)
+
+app.post(
+  '/generate_tag',
+  validator('json', (value, c) => {
+    // todo
+    return {
+      title: value.title,
+      pageDesc: value.pageDesc,
+      model: value.model,
+      tagLanguage: value.tagLanguage,
+      preferredTags: value.preferredTags,
+    }
+  }),
+  async (c) => {
+    const { title, pageDesc, model, tagLanguage, preferredTags } = c.req.valid('json')
+
+    try {
+      const res = await c.env.AI.run(
+        model,
+        {
+          messages: buildGenerateTagMessage({ title, pageDesc, tagLanguage, preferredTags }),
+        },
+      )
+
+      try {
+        if (res instanceof ReadableStream) {
+          throw new TypeError('Failed to parse response stream')
+        }
+        const { tags } = JSON.parse(res.response)
+        return c.json(result.success(tags))
+      }
+      catch (error) {
+        console.log(res)
+        return c.json(result.error(500, 'Failed to parse response'))
+      }
+    }
+    catch (error) {
+      return c.json(result.error(500, error.message))
+    }
   },
 )
 

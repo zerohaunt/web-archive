@@ -3,12 +3,22 @@ enum ConfigKey {
   aiTag = 'config/ai_tag',
 }
 
-interface AITagConfig {
+type AITagConfig = CloudFlareAITagConfig | OpenAIConfig
+
+interface BaseAITagConfig {
   tagLanguage: 'en' | 'zh'
-  apiUrl: string
-  apiKey: string
   model: string
   preferredTags: string[]
 }
 
-export { ConfigKey, AITagConfig }
+interface CloudFlareAITagConfig extends BaseAITagConfig {
+  type: 'cloudflare'
+}
+
+interface OpenAIConfig extends BaseAITagConfig {
+  type: 'openai'
+  apiKey: string
+  apiUrl: string
+}
+
+export { ConfigKey, AITagConfig, OpenAIConfig, CloudFlareAITagConfig }

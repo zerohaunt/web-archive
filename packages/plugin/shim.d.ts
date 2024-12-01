@@ -40,5 +40,6 @@ declare module 'webext-bridge' {
     'scrape-page-data': ProtocolWithReturn<SingleFileSetting, { content: string, title: string, href: string, pageDesc: string }>
     'scrape-available': ProtocolWithReturn<{ tabId: number }, { available: boolean }>
     'get-ai-tag-config': ProtocolWithReturn<{}, { aiTagConfig: AITagConfig }>
+    'generate-tag': ProtocolWithReturn<GenerateTagProps, { tags: string[] }>
   }
 }

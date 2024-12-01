@@ -5,7 +5,7 @@ import { ChevronDown } from 'lucide-react'
 import { useContext, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@web-archive/shared/components/form'
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@web-archive/shared/components/form'
 import { useRequest } from 'ahooks'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@web-archive/shared/components/select'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -19,15 +19,26 @@ import TagContext from '~/store/tag'
 function AITagSettingCollapsible() {
   const [open, setOpen] = useState(false)
 
-  const formSchema = z.object({
-    tagLanguage: z.enum(['en', 'zh']),
-    apiUrl: z.string().min(1, { message: 'API URL is required' }),
-    apiKey: z.string().min(1, { message: 'API Key is required' }),
-    model: z.string().min(1, { message: 'Model is required' }),
-    preferredTags: z.array(z.string()),
-  })
+  const formSchema = z.discriminatedUnion('type', [
+    z.object({
+      type: z.literal('cloudflare'),
+      tagLanguage: z.enum(['en', 'zh']),
+      model: z.string().min(1, { message: 'Model name is required' }),
+      preferredTags: z.array(z.string()),
+    }),
+    z.object({
+      type: z.literal('openai'),
+      tagLanguage: z.enum(['en', 'zh']),
+      model: z.string().min(1, { message: 'Model name is required' }),
+      preferredTags: z.array(z.string()),
+      apiUrl: z.string().url({ message: 'Please enter a valid API URL' }),
+      apiKey: z.string().min(1, { message: 'API Key is required' }),
+    }),
+  ])
+
   const form = useForm<z.infer<typeof formSchema>>({
     defaultValues: {
+      type: 'openai',
       tagLanguage: 'en',
       apiUrl: '',
       apiKey: '',
@@ -89,6 +100,35 @@ function AITagSettingCollapsible() {
             >
               <FormField
                 control={form.control}
+                name="type"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Service Type</FormLabel>
+                    <FormControl>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select Service Type"></SelectValue>
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="cloudflare">Cloudflare</SelectItem>
+                          <SelectItem value="openai">OpenAI</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormDescription>
+                      Cloudflare has a free tier, see
+                      {' '}
+                      <a className="font-bold underline" href="https://developers.cloudflare.com/workers-ai/platform/pricing/">
+                        Workers AI Pricing
+                      </a>
+                      .
+                    </FormDescription>
+                  </FormItem>
+                )}
+              >
+              </FormField>
+              <FormField
+                control={form.control}
                 name="tagLanguage"
                 render={({ field }) => (
                   <FormItem>
@@ -108,34 +148,40 @@ function AITagSettingCollapsible() {
                 )}
               >
               </FormField>
-              <FormField
-                control={form.control}
-                name="apiUrl"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>API URL</FormLabel>
-                    <FormControl>
-                      <Input placeholder="https://api.openai.com/v1/chat/completions" {...field} />
-                    </FormControl>
-                    <FormMessage></FormMessage>
-                  </FormItem>
-                )}
-              >
-              </FormField>
-              <FormField
-                control={form.control}
-                name="apiKey"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>API Key</FormLabel>
-                    <FormControl>
-                      <Input placeholder="API Key" {...field} />
-                    </FormControl>
-                    <FormMessage></FormMessage>
-                  </FormItem>
-                )}
-              >
-              </FormField>
+              {
+                form.watch('type') === 'openai' && (
+                  <>
+                    <FormField
+                      control={form.control}
+                      name="apiUrl"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>API URL</FormLabel>
+                          <FormControl>
+                            <Input placeholder="https://api.openai.com/v1/chat/completions" {...field} />
+                          </FormControl>
+                          <FormMessage></FormMessage>
+                        </FormItem>
+                      )}
+                    >
+                    </FormField>
+                    <FormField
+                      control={form.control}
+                      name="apiKey"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>API Key</FormLabel>
+                          <FormControl>
+                            <Input placeholder="API Key" {...field} />
+                          </FormControl>
+                          <FormMessage></FormMessage>
+                        </FormItem>
+                      )}
+                    >
+                    </FormField>
+                  </>
+                )
+              }
 
               <FormField
                 control={form.control}
@@ -144,8 +190,23 @@ function AITagSettingCollapsible() {
                   <FormItem>
                     <FormLabel>Model</FormLabel>
                     <FormControl>
-                      <Input placeholder="gpt-4o/gpt-4/..." {...field} />
+                      <Input
+                        placeholder={form.watch('type') === 'cloudflare'
+                          ? '@cf/mistral/mistral-7b-instruct-v0.1/...'
+                          : 'gpt-4/gpt-4/...'}
+                        {...field}
+                      />
                     </FormControl>
+                    {
+                      form.watch('type') === 'cloudflare' && (
+                        <FormDescription>
+                          The model name can be found in the model detail page. Such as
+                          {' '}
+                          <a className="font-bold underline" href="https://developers.cloudflare.com/workers-ai/models/mistral-7b-instruct-v0.1/">mistral-7b-instruct-v0.1</a>
+                          .
+                        </FormDescription>
+                      )
+                    }
                     <FormMessage></FormMessage>
                   </FormItem>
                 )}

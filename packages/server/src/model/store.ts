@@ -64,8 +64,7 @@ async function getAITagConfig(DB: D1Database): Promise<AITagConfig> {
   if (result.results.length === 0) {
     return {
       tagLanguage: 'en',
-      apiUrl: '',
-      apiKey: '',
+      type: 'cloudflare',
       model: '',
       preferredTags: [],
     }

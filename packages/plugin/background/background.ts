@@ -180,3 +180,22 @@ onMessage('get-ai-tag-config', async () => {
     aiTagConfig,
   }
 })
+
+onMessage('generate-tag', async ({ data: { title, pageDesc, tagLanguage, preferredTags, model } }) => {
+  const tags = await request('/tags/generate_tag', {
+    method: 'POST',
+    body: JSON.stringify({
+      title,
+      pageDesc,
+      tagLanguage,
+      preferredTags,
+      model,
+    }),
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
+  return {
+    tags,
+  }
+})
