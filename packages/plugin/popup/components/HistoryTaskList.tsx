@@ -79,9 +79,11 @@ function TaskListItem({ task }: { task: SeriableSingleFileTask }) {
   return (
     <div className="flex justify-between items-center h-6 w-full space-x-1">
       <div className="font-bold cursor-pointer overflow-hidden text-ellipsis text-nowrap" onClick={openOriginalPage}>{task.title}</div>
-      <div>{runningTimeText}</div>
-      <div className="flex mt-0.5">
-        <TaskStatusIcon status={task.status} errorMessage={task.errorMessage}></TaskStatusIcon>
+      <div className="flex">
+        <div>{runningTimeText}</div>
+        <div className="flex mt-0.5">
+          <TaskStatusIcon status={task.status} errorMessage={task.errorMessage}></TaskStatusIcon>
+        </div>
       </div>
     </div>
   )
