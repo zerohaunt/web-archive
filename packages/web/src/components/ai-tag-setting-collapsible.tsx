@@ -98,6 +98,10 @@ function AITagSettingCollapsible() {
               onSubmit={form.handleSubmit(setAITagConfigRun)}
               className="space-y-4 p-2"
             >
+              <FormDescription>
+                Use page title and description to generate tags. You can also set preferred tags to be included in the generated tags.
+              </FormDescription>
+
               <FormField
                 control={form.control}
                 name="type"
@@ -217,7 +221,7 @@ function AITagSettingCollapsible() {
                 name="preferredTags"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Prefered Tags</FormLabel>
+                    <FormLabel>Preferred Tags</FormLabel>
                     <FormControl>
                       <AutoCompleteTagInput
                         tags={tagCache ?? []}

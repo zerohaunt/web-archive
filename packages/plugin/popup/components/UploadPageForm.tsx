@@ -91,7 +91,7 @@ function UploadPageForm({ setActivePage }: UploadPageFormProps) {
     },
   )
 
-  function handleCancle() {
+  function handleCancel() {
     setActivePage('home')
   }
 
@@ -132,7 +132,7 @@ function UploadPageForm({ setActivePage }: UploadPageFormProps) {
   }
 
   return (
-    <div className="w-80 p-4 space-y-4 flex flex-col">
+    <div className="w-80 max-h-[600px] p-4 space-y-4 flex flex-col scrollbar-hide overflow-auto">
       <div className="flex flex-col space-y-2">
         <Label
           htmlFor="title"
@@ -205,7 +205,7 @@ function UploadPageForm({ setActivePage }: UploadPageFormProps) {
 
       <div className="flex justify-between">
         <Button
-          onClick={handleCancle}
+          onClick={handleCancel}
           variant="outline"
         >
           Cancel
