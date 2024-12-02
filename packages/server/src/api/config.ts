@@ -1,6 +1,7 @@
 import { Hono } from 'hono'
 import { validator } from 'hono/validator'
 import type { AITagConfig } from '@web-archive/shared/types'
+import { z } from 'zod'
 import type { HonoTypeUserInformation } from '~/constants/binding'
 import { getAITagConfig, getShouldShowRecent, setAITagConfig, setShouldShowRecent } from '~/model/store'
 import result from '~/utils/result'
@@ -56,12 +57,44 @@ app.get('/ai_tag', async (c) => {
 app.post(
   '/ai_tag',
   validator('json', (value, c) => {
-    // todo validate
-    if (typeof value !== 'object') {
-      return c.json(result.error(400, 'aiTagConfig is required'))
+    const modelError = {
+      message: 'Model name is required',
+    }
+    const apiUrlError = {
+      message: 'API URL is required',
+    }
+    const apiKeyError = {
+      message: 'API Key is required',
+    }
+    const cloudflareSchema = z.object({
+      type: z.literal('cloudflare'),
+      tagLanguage: z.enum(['en', 'zh']).default('en'),
+      model: z.string(modelError).min(1, modelError),
+      preferredTags: z.array(z.string()).default([]),
+    })
+    const openaiSchema = z.object({
+      type: z.literal('openai'),
+      tagLanguage: z.enum(['en', 'zh']).default('en'),
+      model: z.string(modelError).min(1, modelError),
+      preferredTags: z.array(z.string()).default([]),
+      apiUrl: z.string(apiUrlError).min(1, apiUrlError),
+      apiKey: z.string(apiKeyError).min(1, apiKeyError),
+    })
+
+    const schema = z.discriminatedUnion('type', [
+      cloudflareSchema,
+      openaiSchema,
+    ])
+    const parsed = schema.safeParse(value)
+    if (!parsed.success) {
+      if (parsed.error.errors.length > 0) {
+        return c.json(result.error(400, parsed.error.errors[0].message))
+      }
+      return c.json(result.error(400, 'Invalid request'))
     }
 
-    return value as AITagConfig
+    // todo set tsconfig strict to avoid type assertion
+    return parsed.data as AITagConfig
   }),
   async (c) => {
     const aiTagConfig = c.req.valid('json')

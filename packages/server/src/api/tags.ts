@@ -1,6 +1,7 @@
 import { buildGenerateTagMessage, isNil, isNumberString } from '@web-archive/shared/utils'
 import { Hono } from 'hono'
 import { validator } from 'hono/validator'
+import { z } from 'zod'
 import type { HonoTypeUserInformation } from '~/constants/binding'
 import { deleteTagById, insertTag, selectAllTags, updateTag } from '~/model/tag'
 import result from '~/utils/result'
@@ -87,20 +88,28 @@ app.delete(
 app.post(
   '/generate_tag',
   validator('json', (value, c) => {
-    // todo
-    return {
-      title: value.title,
-      pageDesc: value.pageDesc,
-      model: value.model,
-      tagLanguage: value.tagLanguage,
-      preferredTags: value.preferredTags,
+    const schema = z.object({
+      title: z.string({ message: 'Title is required' }).min(1, { message: 'Title is required' }),
+      pageDesc: z.string().default(''),
+      model: z.string({ message: 'Model name is required' }).min(1, { message: 'Model name is required' }),
+      tagLanguage: z.enum(['en', 'zh'], { message: 'Invalid tag language' }),
+      preferredTags: z.array(z.string()).default([]),
+    })
+    const parsed = schema.safeParse(value)
+    if (!parsed.success) {
+      if (parsed.error.errors.length > 0) {
+        return c.json(result.error(400, parsed.error.errors[0].message))
+      }
+      return c.json(result.error(400, 'Invalid request'))
     }
+    return parsed.data
   }),
   async (c) => {
     const { title, pageDesc, model, tagLanguage, preferredTags } = c.req.valid('json')
 
     try {
       const res = await c.env.AI.run(
+        // @ts-expect-error use BaseAiTextGenerationModels to check model? or use type assertion?
         model,
         {
           messages: buildGenerateTagMessage({ title, pageDesc, tagLanguage, preferredTags }),
@@ -111,6 +120,9 @@ app.post(
         if (res instanceof ReadableStream) {
           throw new TypeError('Failed to parse response stream')
         }
+        if (res.response === undefined) {
+          throw new TypeError('Failed to parse response')
+        }
         const { tags } = JSON.parse(res.response)
         return c.json(result.success(tags))
       }
@@ -120,7 +132,10 @@ app.post(
       }
     }
     catch (error) {
-      return c.json(result.error(500, error.message))
+      if (error instanceof Error) {
+        return c.json(result.error(500, error.message))
+      }
+      return c.json(result.error(500, 'Failed to generate tags'))
     }
   },
 )
