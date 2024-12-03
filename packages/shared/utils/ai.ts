@@ -54,6 +54,8 @@ function generateChatCompletion(tagLanguage: string, preferredTags: string[]): s
     5. Return format must be: {"tags": ["tag1", "tag2", ...]}
     6. Do not return any explanatory text
     7. Please prioritize these tags and add other relevant tags based on the content: [${preferredTags.join(', ')}]
+    8. Keep tags concise and focused. Return no more than 5 tags in total
+    9. Select the most representative and important tags only
   `
 }
 
@@ -82,7 +84,7 @@ export async function generateTagByOpenAI(props: GenerateTagProps): Promise<Arra
     const data = await res.json() as GenerateTagResponse
     const content = data.choices[0].message.content
     const tagJson = JSON.parse(content)
-    return tagJson.tags
+    return tagJson.tags.slice(0, 5)
   }
   catch (error) {
     throw new Error('Failed to parse response')
