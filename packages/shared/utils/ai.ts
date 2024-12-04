@@ -87,6 +87,6 @@ export async function generateTagByOpenAI(props: GenerateTagProps): Promise<Arra
     return tagJson.tags.slice(0, 5)
   }
   catch (error) {
-    throw new Error('Failed to parse response')
+    throw new Error('Failed to parse response, please try again or change model')
   }
 }

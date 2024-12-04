@@ -69,6 +69,10 @@ function TagInputWithCache({ onValueChange, title, description }: TagInputWithCa
       onSuccess: (data) => {
         tagInputRef.current?.addTags(data)
       },
+      onError: (error) => {
+        console.error(error)
+        toast.error(error?.message)
+      },
     },
   )
 

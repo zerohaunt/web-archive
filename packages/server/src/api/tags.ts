@@ -121,14 +121,14 @@ app.post(
           throw new TypeError('Failed to parse response stream')
         }
         if (res.response === undefined) {
-          throw new TypeError('Failed to parse response')
+          throw new TypeError('Failed to parse response, please try again or change model')
         }
         const { tags } = JSON.parse(res.response)
-        return c.json(result.success(tags))
+        return c.json(result.success(tags.slice(0, 5)))
       }
       catch (error) {
         console.log(res)
-        return c.json(result.error(500, 'Failed to parse response'))
+        return c.json(result.error(500, 'Failed to parse response, please try again or change model'))
       }
     }
     catch (error) {
