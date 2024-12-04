@@ -1,6 +1,7 @@
 import { sendMessage } from 'webext-bridge/background'
 import Browser from 'webextension-polyfill'
 import { request } from './background'
+import { keepAlive } from './keepAlive'
 import type { SingleFileSetting } from '~/utils/singleFile'
 import { base64ToBlob } from '~/utils/file'
 
@@ -26,15 +27,19 @@ async function markUnfinishedTasksAsFailed() {
     if (task.status !== 'done' && task.status !== 'failed') {
       task.status = 'failed'
       task.endTimeStamp = Date.now()
-      task.errorMessage = 'browser unexpected shutdown'
+      task.errorMessage = 'Failed because of service worker restart'
     }
   })
   await saveTaskList(tasks)
 }
 
-Browser.runtime.onStartup.addListener(async () => {
-  console.log('onStartup')
-  await markUnfinishedTasksAsFailed()
+let isInit = false
+Browser.runtime.onConnect.addListener(() => {
+  console.log('connect', isInit)
+  if (!isInit) {
+    isInit = true
+    markUnfinishedTasksAsFailed()
+  }
 })
 
 async function getTaskList(): Promise<SeriableSingleFileTask[]> {
@@ -62,7 +67,7 @@ async function saveTask(task: SeriableSingleFileTask) {
 async function clearFinishedTaskList() {
   const tasks = await getTaskList()
 
-  const newTasks = tasks.filter(task => task.status !== 'done')
+  const newTasks = tasks.filter(task => task.status !== 'done' && task.status !== 'failed')
   await saveTaskList(newTasks)
 }
 
@@ -103,9 +108,12 @@ async function uploadPageData(pageForm: CreateTaskOptions['pageForm'] & { conten
   if (screenshot) {
     form.append('screenshot', base64ToBlob(screenshot, 'image/webp'))
   }
+  const timeout = 5 * 60 * 1000
+  keepAlive(timeout)
   await request('/pages/upload_new_page', {
     method: 'POST',
     body: form,
+    timeout,
   })
 }
 
