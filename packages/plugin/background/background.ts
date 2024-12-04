@@ -43,10 +43,17 @@ async function appendAuthHeader(options?: RequestInit) {
 }
 
 /* global RequestInit */
-export async function request(url: string, options?: RequestInit | undefined) {
+export async function request(url: string, options?: (RequestInit & { timeout?: number }) | undefined) {
   const { serverUrl } = await Browser.storage.local.get('serverUrl')
+  const abortController = new AbortController()
+  if (options?.timeout) {
+    setTimeout(() => {
+      abortController.abort('upload timeout')
+    }, options.timeout)
+  }
   const res = await fetch(`${serverUrl}/api${url}`, {
     credentials: 'same-origin',
+    signal: abortController.signal,
     ...await appendAuthHeader(options),
   })
   if (res.ok) {
