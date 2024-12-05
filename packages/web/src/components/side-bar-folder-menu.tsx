@@ -9,6 +9,7 @@ import { useState } from 'react'
 import type { Folder as FolderType } from '@web-archive/shared/types'
 import { useRequest } from 'ahooks'
 import toast from 'react-hot-toast'
+import { Link } from 'react-router-dom'
 import NewFolderDialog from './new-folder-dialog'
 import EditFolderDialog from './edit-folder-dialog'
 import { deleteFolder, getAllFolder } from '~/data/folder'
@@ -38,9 +39,6 @@ function SidebarFolderMenu({ openedFolder, setOpenedFolder, className }: Sidebar
 
   const { data: folders, refresh, mutate: setFolders, loading: foldersLoading } = useRequest(getAllFolder)
 
-  const handleFolderClick = (id: number) => {
-    setOpenedFolder(id)
-  }
   emitter.on('refreshSideBar', refresh)
 
   const handleDeleteFolder = async (folderId: number) => {
@@ -106,16 +104,19 @@ function SidebarFolderMenu({ openedFolder, setOpenedFolder, className }: Sidebar
               : (
                   folders?.map(folder => (
                     <SidebarMenuItem key={folder.id}>
-                      <SidebarMenuButton>
-                        <Folder
-                          name={folder.name}
-                          id={folder.id}
-                          isOpen={openedFolder === folder.id}
-                          onClick={handleFolderClick}
-                          onDelete={handleDeleteFolder}
-                          onEdit={handleEditFolder}
-                        />
-                      </SidebarMenuButton>
+                      <Link to={`/folder/${folder.id}`}>
+                        <SidebarMenuButton>
+                          <Folder
+                            name={folder.name}
+                            id={folder.id}
+                            isOpen={openedFolder === folder.id}
+                            onDelete={handleDeleteFolder}
+                            onEdit={handleEditFolder}
+                          />
+
+                        </SidebarMenuButton>
+                      </Link>
+
                     </SidebarMenuItem>
                   ))
                 )}
