@@ -8,6 +8,7 @@ import { ExternalLink, Eye, EyeOff, SquarePen, Trash } from 'lucide-react'
 import { useLocation } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { Badge } from '@web-archive/shared/components/badge'
+import { TooltipPortal } from '@radix-ui/react-tooltip'
 import ScreenshotView from './screenshot-view'
 import { useNavigate } from '~/router'
 import { updatePageShowcase } from '~/data/page'
@@ -42,14 +43,14 @@ function Comp({ page, onPageDelete }: { page: Page, onPageDelete?: (page: Page) 
     }
   }
 
-  const [showcaseSate, setShowcaseState] = useState(page.isShowcased)
+  const [showcaseState, setShowcaseState] = useState(page.isShowcased)
   const { run: updateShowcase } = useRequest(
     updatePageShowcase,
     {
       manual: true,
       onSuccess() {
         toast.success('Success')
-        setShowcaseState(showcaseSate === 1 ? 0 : 1)
+        setShowcaseState(showcaseState === 1 ? 0 : 1)
       },
     },
   )
@@ -117,9 +118,11 @@ function Comp({ page, onPageDelete }: { page: Page, onPageDelete?: (page: Page) 
                   <ExternalLink className="w-5 h-5" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>
-                Open original link
-              </TooltipContent>
+              <TooltipPortal>
+                <TooltipContent>
+                  Open original link
+                </TooltipContent>
+              </TooltipPortal>
             </Tooltip>
           </TooltipProvider>
 
@@ -146,19 +149,22 @@ function Comp({ page, onPageDelete }: { page: Page, onPageDelete?: (page: Page) 
                         size="sm"
                         onClick={(e) => {
                           e.stopPropagation()
-                          updateShowcase({ id: page.id, isShowcased: showcaseSate === 1 ? 0 : 1 })
+                          updateShowcase({ id: page.id, isShowcased: showcaseState === 1 ? 0 : 1 })
                         }}
                       >
                         {
-                          showcaseSate === 1 ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />
+                          showcaseState === 1 ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />
                         }
                       </Button>
                     </TooltipTrigger>
-                    <TooltipContent>
-                      {
-                        showcaseSate === 1 ? 'Remove from showcase' : 'Show in showcase'
-                      }
-                    </TooltipContent>
+                    <TooltipPortal>
+                      <TooltipContent>
+                        {
+                          showcaseState === 1 ? 'Remove from showcase' : 'Show in showcase'
+                        }
+                      </TooltipContent>
+                    </TooltipPortal>
+
                   </Tooltip>
                 </TooltipProvider>
               </>
