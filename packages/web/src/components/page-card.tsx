@@ -5,13 +5,14 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '@web-archive/shared/components/button'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@web-archive/shared/components/tooltip'
 import { ExternalLink, Eye, EyeOff, SquarePen, Trash } from 'lucide-react'
-import { Link, useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { Badge } from '@web-archive/shared/components/badge'
 import ScreenshotView from './screenshot-view'
 import { updatePageShowcase } from '~/data/page'
 import CardEditDialog from '~/components/card-edit-dialog'
 import TagContext from '~/store/tag'
+import { Link } from '~/router'
 
 function Comp({ page, onPageDelete }: { page: Page, onPageDelete?: (page: Page) => void }) {
   const { tagCache, refreshTagCache } = useContext(TagContext)
@@ -22,7 +23,7 @@ function Comp({ page, onPageDelete }: { page: Page, onPageDelete?: (page: Page) 
 
   const location = useLocation()
   const isShowcased = location.pathname.startsWith('/showcase')
-  const redirectTo = isShowcased ? `/showcase/page/${page.id}` : `/page/${page.id}`
+  const redirectTo = isShowcased ? `/showcase/page/:slug` : `/page/:slug`
 
   const handleClickPageUrl = (e: React.MouseEvent, page: Page) => {
     e.stopPropagation()
@@ -67,7 +68,7 @@ function Comp({ page, onPageDelete }: { page: Page, onPageDelete?: (page: Page) 
         key={page.id}
         className="cursor-pointer hover:shadow-lg transition-shadow flex flex-col relative group overflow-hidden"
       >
-        <Link to={redirectTo}>
+        <Link to={redirectTo} params={{ slug: page.id.toString() }}>
           <CardHeader>
             <CardTitle className="leading-8 text-lg line-clamp-2">{page.title}</CardTitle>
             <CardDescription className="space-x-1">
